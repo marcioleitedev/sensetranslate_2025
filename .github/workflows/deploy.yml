@@ -32,15 +32,17 @@ jobs:
         run: |
           rsync -avz --exclude='.git/' --exclude='.github/' --exclude='node_modules/' --exclude='storage/' --exclude='.env' ./ senset65@sensetranslate.com:~/public_html/
 
-      - name: 📌 Executar comandos no servidor (migrações, cache, etc.)
+      - name: 📌 Deploy Via SSH
         run: |
-          ssh senset65@sensetranslate.com << 'EOF'
-          cd ~/public_html
-          composer install --no-dev --optimize-autoloader
-          php artisan migrate --force
-          php artisan config:clear
-          php artisan cache:clear
-          php artisan route:cache
-          php artisan view:cache
-          exit
+          ssh -o StrictHostKeyChecking=no senset65@sensetranslate.com << 'EOF'
+            cd ~/public_html  # Caminho correto para sua hospedagem
+            git pull origin main
+            composer install --no-dev --prefer-dist
+            php artisan migrate --force
+            php artisan cache:clear
+            php artisan config:clear
+            php artisan route:clear
+            php artisan view:clear
+            exit
           EOF
+      
