@@ -1,0 +1,46 @@
+name: Deploy Laravel + Vue to cPanel
+
+on:
+  push:
+    branches:
+      - main  # Altere para sua branch principal, se for diferente
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚀 Clonar Repositório
+        uses: actions/checkout@v4
+
+      - name: 🔑 Configurar SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H SEU-DOMINIO.com >> ~/.ssh/known_hosts
+
+      - name: 📦 Instalar Dependências do Laravel
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: 🔨 Compilar o Frontend (Vue.js + Vite)
+        run: |
+          npm install
+          npm run build  # Compila os arquivos para produção
+
+      - name: 📂 Enviar Arquivos para o cPanel
+        run: |
+          rsync -avz --exclude='.git/' --exclude='.github/' --exclude='node_modules/' --exclude='storage/' --exclude='.env' ./ usuario@SEU-DOMINIO.com:~/public_html/
+
+      - name: 📌 Executar comandos no servidor (migrações, cache, etc.)
+        run: |
+          ssh usuario@SEU-DOMINIO.com << 'EOF'
+          cd ~/public_html
+          composer install --no-dev --optimize-autoloader
+          php artisan migrate --force
+          php artisan config:clear
+          php artisan cache:clear
+          php artisan route:cache
+          php artisan view:cache
+          exit
+          EOF
