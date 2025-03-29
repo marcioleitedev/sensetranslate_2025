@@ -30,11 +30,11 @@ jobs:
 
       - name: 📂 Enviar Arquivos para o cPanel
         run: |
-          rsync -avz --exclude='.git/' --exclude='.github/' --exclude='node_modules/' --exclude='storage/' --exclude='.env' ./ usuario@SEU-DOMINIO.com:~/public_html/
+          rsync -avz --exclude='.git/' --exclude='.github/' --exclude='node_modules/' --exclude='storage/' --exclude='.env' ./ senset65@sensetranslate.com:~/public_html/
 
       - name: 📌 Executar comandos no servidor (migrações, cache, etc.)
         run: |
-          ssh usuario@SEU-DOMINIO.com << 'EOF'
+          ssh senset65@sensetranslate.com << 'EOF'
           cd ~/public_html
           composer install --no-dev --optimize-autoloader
           php artisan migrate --force
