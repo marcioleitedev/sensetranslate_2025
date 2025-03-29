@@ -3,7 +3,7 @@ name: Deploy Laravel + Vue to cPanel
 on:
   push:
     branches:
-      - main  # Altere para sua branch principal, se for diferente
+      - main  # Altere para sua branch principal, se necessário
 
 jobs:
   deploy:
@@ -18,7 +18,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H SEU-DOMINIO.com >> ~/.ssh/known_hosts
+          echo "${{ secrets.KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
 
       - name: 📦 Instalar Dependências do Laravel
         run: composer install --no-dev --optimize-autoloader
@@ -26,23 +26,23 @@ jobs:
       - name: 🔨 Compilar o Frontend (Vue.js + Vite)
         run: |
           npm install
-          npm run build  # Compila os arquivos para produção
+          npm run build  # Gera os arquivos para produção
 
-      - name: 📂 Enviar Arquivos para o cPanel
+      - name: 📂 Enviar Arquivos para o Servidor (cPanel)
         run: |
-          rsync -avz --exclude='.git/' --exclude='.github/' --exclude='node_modules/' --exclude='storage/' --exclude='.env' ./ senset65@sensetranslate.com:~/public_html/
+          rsync -avz --exclude='.git/' --exclude='.github/' --exclude='node_modules/' \
+          --exclude='storage/' --exclude='.env' ./ senset65@sensetranslate.com:~/public_html/
 
-      - name: 📌 Deploy Via SSH
+      - name: 📌 Executar Comandos no Servidor
         run: |
-          ssh -o StrictHostKeyChecking=no senset65@sensetranslate.com << 'EOF'
-            cd ~/public_html  # Caminho correto para sua hospedagem
-            git pull origin main
-            composer install --no-dev --prefer-dist
+          ssh senset65@sensetranslate.com << 'EOF'
+            cd ~/public_html
+            composer install --no-dev --optimize-autoloader
             php artisan migrate --force
-            php artisan cache:clear
             php artisan config:clear
+            php artisan cache:clear
             php artisan route:clear
             php artisan view:clear
+            php artisan storage:link
             exit
           EOF
-      
