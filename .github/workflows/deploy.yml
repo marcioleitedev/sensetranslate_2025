@@ -31,12 +31,12 @@ jobs:
       - name: 📂 Enviar Arquivos para o Servidor (cPanel)
         run: |
           rsync -avz --exclude='.git/' --exclude='.github/' --exclude='node_modules/' \
-          --exclude='storage/' --exclude='.env' ./ senset65@sensetranslate.com:~/public_html/
+          --exclude='storage/' --exclude='.env' ./ senset65@sensetranslate.com:~/public_html/homolog/
 
       - name: 📌 Executar Comandos no Servidor
         run: |
           ssh senset65@sensetranslate.com << 'EOF'
-            cd ~/public_html
+            cd ~/public_html/homolog
             composer install --no-dev --optimize-autoloader
             php artisan migrate --force
             php artisan config:clear
