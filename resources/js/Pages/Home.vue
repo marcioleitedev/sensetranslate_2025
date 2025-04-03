@@ -1,6 +1,6 @@
 <template>
 
-  <Menu /> <!-- Componente Menu incluído -->
+  <Menu /> 
   <div class="container text-center">
     <h1 class="mt-5 text-primary">Bem-vindo à Loja de Serviços</h1>
     <p class="lead">Escolha um serviço e aproveite!</p>
@@ -13,7 +13,6 @@ import Menu from '@/Components/Menu.vue';
 </script>
 
 <style scoped>
-/* CSS adicional para o componente */
 .container {
   background-color: #f9f9f9;
   padding: 20px;
