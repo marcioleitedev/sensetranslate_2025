@@ -9,7 +9,6 @@ jobs:
   deploy:
     name: Deploy via SSH
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Aumenta o tempo limite
 
     steps:
       - name: Checkout do código
@@ -18,61 +17,34 @@ jobs:
       - name: Configurar SSH
         run: |
           mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          # Converter para formato PEM se necessário
+          ssh-keygen -p -m PEM -f ~/.ssh/id_rsa -N "" -q
           chmod 600 ~/.ssh/id_rsa
-          echo "Host ${{ secrets.SSH_HOST }}" >> ~/.ssh/config
-          echo "  IdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
-          echo "  IdentitiesOnly yes" >> ~/.ssh/config  # Força usar apenas a chave especificada
-          echo "  ServerAliveInterval 15" >> ~/.ssh/config
-          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
-          chmod 600 ~/.ssh/config
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
+          
+          # Testar conexão (para debug)
+          ssh -v -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} exit
 
-          # Teste de conexão simplificado
-          ssh -v -o BatchMode=yes ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} exit
-
-      - name: Deploy Laravel
+      - name: Enviar arquivos para o servidor
         run: |
-          # Comando único para evitar múltiplas conexões
-          rsync -avz --delete --no-perms --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r \
-            -e "ssh -o BatchMode=yes -o ConnectTimeout=15" \
-            --exclude=/.git \
-            --exclude=/.env \
-            --exclude=/.github \
-            --exclude=/node_modules \
-            --exclude=/storage \
-            --exclude=/tests \
-            --include=/public/ \
-            --include=/app/ \
-            --include=/bootstrap/ \
-            --include=/config/ \
-            --include=/database/ \
-            --include=/resources/ \
-            --include=/routes/ \
-            --include=/vendor/ \
-            --include=/composer.json \
-            --include=/composer.lock \
-            --include=/artisan \
-            --exclude=* \
-            ./ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:public_html/homolog/
+          rsync -avz --delete -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
+            --exclude=node_modules \
+            --exclude=vendor \
+            --exclude=.git \
+            --exclude=.env \
+            --exclude=storage \
+            ./ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:public_html/homolog
 
-      - name: Executar comandos no servidor
+      - name: Rodar comandos no servidor
         run: |
-          ssh -o BatchMode=yes ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
           cd public_html/homolog
-          
-          # Configurações de permissão
-          find . -type d -exec chmod 755 {} \;
-          find . -type f -exec chmod 644 {} \;
-          chmod -R 775 storage/
-          chmod -R 775 bootstrap/cache/
-          
-          # Comandos do Laravel
-          composer install --no-dev --optimize-autoloader --no-interaction
-          php artisan optimize:clear
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
+          php -v
+          composer install --no-dev --optimize-autoloader
+          php artisan migrate --force
+          php artisan cache:clear
+          php artisan config:clear
+          php artisan route:clear
+          php artisan view:clear
           EOF
