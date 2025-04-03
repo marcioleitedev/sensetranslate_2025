@@ -1,48 +1,38 @@
-name: Deploy Laravel para HostGator
+name: Deploy Laravel via SSH
 
 on:
   push:
     branches:
-      - main  # Ajuste para a branch de deploy
+      - main  # Altere se necessário
 
 jobs:
   deploy:
-    name: Enviar arquivos via FTP
+    name: Deploy via SSH
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Configurar FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./  # Enviar tudo
-          server-dir: public_html/homolog/
-          exclude: |
-            **/.git*
-            **/node_modules/**
-            **/vendor/**
-            .env
-            .htaccess
-
-      - name: Instalar dependências PHP
+      - name: Configurar SSH
         run: |
-          curl -sS https://getcomposer.org/installer | php
-          php composer.phar install --no-dev --optimize-autoloader
-        working-directory: public_html/homolog
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Rodar migrações
-        run: php artisan migrate --force
-        working-directory: public_html/homolog
-
-      - name: Limpar cache e configurar permissões
+      - name: Enviar arquivos para o servidor
         run: |
+          rsync -avz --exclude=node_modules --exclude=vendor --exclude=.git --exclude=.env ./ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:public_html/homolog
+
+      - name: Rodar comandos no servidor
+        run: |
+          ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+          cd public_html/homolog
+          composer install --no-dev --optimize-autoloader
+          php artisan migrate --force
           php artisan cache:clear
           php artisan config:clear
           php artisan route:clear
           php artisan view:clear
-        working-directory: public_html/homolog
+          EOF
