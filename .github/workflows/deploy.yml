@@ -3,7 +3,7 @@ name: Deploy Laravel via SSH
 on:
   push:
     branches:
-      - main  # Altere se necessário
+      - main
 
 jobs:
   deploy:
@@ -18,17 +18,29 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          # Converter para formato PEM se necessário
+          ssh-keygen -p -m PEM -f ~/.ssh/id_rsa -N "" -q
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          
+          # Testar conexão (para debug)
+          ssh -v -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} exit
 
       - name: Enviar arquivos para o servidor
         run: |
-          rsync -avz --exclude=node_modules --exclude=vendor --exclude=.git --exclude=.env ./ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:public_html/homolog
+          rsync -avz --delete -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
+            --exclude=node_modules \
+            --exclude=vendor \
+            --exclude=.git \
+            --exclude=.env \
+            --exclude=storage \
+            ./ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:public_html/homolog
 
       - name: Rodar comandos no servidor
         run: |
-          ssh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
           cd public_html/homolog
+          php -v
           composer install --no-dev --optimize-autoloader
           php artisan migrate --force
           php artisan cache:clear
