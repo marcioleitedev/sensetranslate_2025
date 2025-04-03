@@ -9,6 +9,7 @@ jobs:
   deploy:
     name: Deploy via SSH
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Aumenta o tempo limite
 
     steps:
       - name: Checkout do código
@@ -20,23 +21,30 @@ jobs:
           chmod 700 ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          echo "Host ${{ secrets.SSH_HOST }}" >> ~/.ssh/config
+          echo "  IdentityFile ~/.ssh/id_rsa" >> ~/.ssh/config
+          echo "  IdentitiesOnly yes" >> ~/.ssh/config  # Força usar apenas a chave especificada
+          echo "  ServerAliveInterval 15" >> ~/.ssh/config
+          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
-      - name: Enviar arquivos para o public/
+          # Teste de conexão simplificado
+          ssh -v -o BatchMode=yes ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} exit
+
+      - name: Deploy Laravel
         run: |
-          # Envia apenas os arquivos que devem estar no public/
-          rsync -avz --delete -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
+          # Comando único para evitar múltiplas conexões
+          rsync -avz --delete --no-perms --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r \
+            -e "ssh -o BatchMode=yes -o ConnectTimeout=15" \
             --exclude=/.git \
             --exclude=/.env \
+            --exclude=/.github \
             --exclude=/node_modules \
             --exclude=/storage \
-            --exclude=/vendor \
             --exclude=/tests \
-            ./public/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:public_html/homolog/public
-
-          # Envia outros arquivos necessários para a raiz do projeto (fora do public/)
-          rsync -avz -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
+            --include=/public/ \
             --include=/app/ \
             --include=/bootstrap/ \
             --include=/config/ \
@@ -50,25 +58,21 @@ jobs:
             --exclude=* \
             ./ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:public_html/homolog/
 
-      - name: Executar comandos do Laravel
+      - name: Executar comandos no servidor
         run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -o BatchMode=yes ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
           cd public_html/homolog
           
-          # Atualiza dependências
-          composer install --no-dev --optimize-autoloader
+          # Configurações de permissão
+          find . -type d -exec chmod 755 {} \;
+          find . -type f -exec chmod 644 {} \;
+          chmod -R 775 storage/
+          chmod -R 775 bootstrap/cache/
           
-          # Configurações do Laravel
-          php artisan storage:link
+          # Comandos do Laravel
+          composer install --no-dev --optimize-autoloader --no-interaction
           php artisan optimize:clear
           php artisan config:cache
           php artisan route:cache
           php artisan view:cache
-          
-          # Migrações (se necessário)
-          # php artisan migrate --force
-          
-          # Ajusta permissões (pode variar conforme necessidade)
-          chmod -R 755 storage
-          chmod -R 755 bootstrap/cache
           EOF
