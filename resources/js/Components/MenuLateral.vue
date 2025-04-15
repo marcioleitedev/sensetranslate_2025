@@ -12,27 +12,51 @@
 
     <ul class="nav flex-column px-2">
       <li class="nav-item">
-        <a class="nav-link text-white" href="#">
+        <a class="nav-link text-white" href="/dashboard">
           <i class="bi bi-speedometer2 me-2"></i>
-          <span v-if="!isCollapsed">Dashboard</span>
+          <span v-if="!isCollapsed"> Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" href="/dashboard/usuarios">
+          <i class="bi bi-person-arms-up"></i>
+          <span v-if="!isCollapsed">  Usuários</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" href="#">
+          <i class="bi bi-filetype-pdf"></i>
+          <span v-if="!isCollapsed">  Orçamentos</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link text-white" href="#">
           <i class="bi bi-people me-2"></i>
-          <span v-if="!isCollapsed">Usuários</span>
+          <span v-if="!isCollapsed">  Clientes</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" href="#">
+          <i class="bi bi-person-gear me-2"></i>
+          <span v-if="!isCollapsed">  Serviços</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" href="#">
+          <i class="bi bi-file-earmark-bar-graph-fill"></i>
+          <span v-if="!isCollapsed">  Contratos</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link text-white" href="#">
           <i class="bi bi-gear me-2"></i>
-          <span v-if="!isCollapsed">Configurações</span>
+          <span v-if="!isCollapsed">  Configurações</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link text-white" href="#">
           <i class="bi bi-box-arrow-right me-2"></i>
-          <span v-if="!isCollapsed">Sair</span>
+          <span v-if="!isCollapsed">  Sair</span>
         </a>
       </li>
     </ul>
