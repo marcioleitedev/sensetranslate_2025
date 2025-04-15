@@ -13,7 +13,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        HandleInertiaRequests::class;
+        $middleware->alias([
+            'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
+        ]);
+
+        // Middleware global do Inertia (se precisar)
+        $middleware->append(HandleInertiaRequests::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
