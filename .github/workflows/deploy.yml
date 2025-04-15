@@ -1,55 +1,24 @@
-name: Deploy Laravel via SSH
+name: Deploy via FTP
 
 on:
   push:
     branches:
-      - main
+      - main # ou a branch que você usa
 
 jobs:
-  deploy:
-    name: Deploy via SSH
+  ftp-deploy:
+    name: FTP Deploy
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do código
-        uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - name: Configurar SSH
-        run: |
-          # Criar diretório .ssh com permissões seguras
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          
-          # Salvar a chave privada com permissões restritas
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa  # Esta é a permissão crítica!
-          
-          # Adicionar host aos known_hosts
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-
-          # Testar conexão (opcional para debug)
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} exit
-
-      - name: Enviar arquivos para o servidor
-        run: |
-          rsync -avz --delete -e "ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no" \
-            --exclude=node_modules \
-            --exclude=vendor \
-            --exclude=.git \
-            --exclude=.env \
-            --exclude=storage \
-            ./ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:public_html/homolog
-
-      - name: Rodar comandos no servidor
-        run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
-          cd public_html/homolog
-          php -v
-          composer install --no-dev --optimize-autoloader
-          php artisan migrate --force
-          php artisan cache:clear
-          php artisan config:clear
-          php artisan route:clear
-          php artisan view:clear
-          EOF
+      - name: Upload via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_TARGET }}
+          local-dir: ./ # você pode mudar se quiser só uma pasta específica
