@@ -1,11 +1,8 @@
 <template>
-   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
   <div class="d-flex">
     <!-- Botão toggle mobile -->
-    <button
-      class="btn btn-primary d-md-none toggle-btn"
-      @click="showMobileMenu = !showMobileMenu"
-    >
+    <button class="btn btn-primary d-md-none toggle-btn" @click="showMobileMenu = !showMobileMenu">
       <i class="bi bi-list"></i>
     </button>
 
@@ -18,10 +15,12 @@
     <!-- Conteúdo -->
     <main class="conteudo flex-grow-1 p-4">
       <h1>Usuários</h1>
-      
+
       <!-- Botão de Cadastro -->
-      <button class="btn btn-success mb-3 ms-auto d-flex" @click="showCreateModal = true"><i class="bi bi-person-add"></i> Cadastrar Usuário</button>
-      
+      <button class="btn btn-success mb-3 ms-auto d-flex" @click="showCreateModal = true">
+        <i class="bi bi-person-add"></i> Cadastrar Usuário
+      </button>
+
       <!-- Tabela de Usuários -->
       <table class="table">
         <thead>
@@ -29,7 +28,7 @@
             <th>ID</th>
             <th>Nome</th>
             <th>Email</th>
-            <th>Nivel</th>
+            <th>Nível</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -37,11 +36,15 @@
           <tr v-for="user in users.data" :key="user.id">
             <td>{{ user.id }}</td>
             <td>{{ user.name }}</td>
-            <td>{{ user.name }}</td>
-             <td>{{ getLevelName(user.level) }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ getLevelName(user.level) }}</td>
             <td>
-              <button class="btn btn-primary" @click="editUser(user)"><i class="bi bi-pencil-square"></i> Editar</button>
-              <button class="btn btn-danger" @click="removeUser(user.id)"><i class="bi bi-trash3"></i> Remover</button>
+              <button class="btn btn-primary me-1" @click="openEditModal(user)">
+                <i class="bi bi-pencil-square"></i> Editar
+              </button>
+              <button class="btn btn-danger" @click="removeUser(user.id)">
+                <i class="bi bi-trash3"></i> Remover
+              </button>
             </td>
           </tr>
         </tbody>
@@ -53,8 +56,15 @@
           <li class="page-item" :class="{ disabled: !users.prev_page_url }">
             <a class="page-link" href="#" @click.prevent="fetchUsers(users.prev_page_url)">Anterior</a>
           </li>
-          <li class="page-item" v-for="page in paginationLinks" :key="page" :class="{ active: page.active }">
-            <a class="page-link" href="#" @click.prevent="fetchUsers(page.url)">{{ page.label }}</a>
+          <li
+            class="page-item"
+            v-for="page in paginationLinks"
+            :key="page.label"
+            :class="{ active: page.active }"
+          >
+            <a class="page-link" href="#" @click.prevent="fetchUsers(page.url)">
+              {{ page.label }}
+            </a>
           </li>
           <li class="page-item" :class="{ disabled: !users.next_page_url }">
             <a class="page-link" href="#" @click.prevent="fetchUsers(users.next_page_url)">Próximo</a>
@@ -107,15 +117,15 @@
               <form @submit.prevent="updateUser">
                 <div class="mb-3">
                   <label for="editName" class="form-label">Nome</label>
-                  <input type="text" class="form-control" id="editName" v-model="editUser.name" required />
+                  <input type="text" class="form-control" id="editName" v-model="userToEdit.name" required />
                 </div>
                 <div class="mb-3">
                   <label for="editEmail" class="form-label">Email</label>
-                  <input type="email" class="form-control" id="editEmail" v-model="editUser.email" required />
+                  <input type="email" class="form-control" id="editEmail" v-model="userToEdit.email" required />
                 </div>
                 <div class="mb-3">
                   <label for="editLevel" class="form-label">Nível</label>
-                  <select class="form-control" id="editLevel" v-model="editUser.level" required>
+                  <select class="form-control" id="editLevel" v-model="userToEdit.level" required>
                     <option value="1">Usuário</option>
                     <option value="2">Funcionário</option>
                     <option value="3">Administrador</option>
@@ -134,78 +144,79 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import MenuLateral from '@/components/MenuLateral.vue';
 import axios from 'axios';
+import MenuLateral from '@/components/MenuLateral.vue';
 
 const showMobileMenu = ref(false);
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
+
 const newUser = ref({ name: '', email: '', level: 1 });
-const editUser = ref({});
+const userToEdit = ref({ id: null, name: '', email: '', level: 1 });
+
 const users = ref([]);
 const paginationLinks = ref([]);
 
-// Função para converter o nível numérico para nome
+// Obter nome do nível
 const getLevelName = (level) => {
   switch (level) {
-    case 1:
-      return 'Cliente';
-    case 2:
-      return 'Funcionário';
-    case 3:
-      return 'Administrador';
-    default:
-      return 'Desconhecido';
+    case 1: return 'Cliente';
+    case 2: return 'Funcionário';
+    case 3: return 'Administrador';
+    default: return 'Desconhecido';
   }
 };
 
+// Buscar usuários
 const fetchUsers = async (url = 'http://localhost:8000/api/usuarios') => {
   try {
     const response = await axios.get(url);
     users.value = response.data;
     paginationLinks.value = response.data.links;
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao buscar usuários:', error);
   }
 };
 
+// Criar novo usuário
 const createUser = async () => {
   try {
     await axios.post('http://localhost:8000/api/usuarios', newUser.value);
     showCreateModal.value = false;
     fetchUsers();
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao cadastrar usuário:', error);
   }
 };
 
-// const editUser = (user) => {
-//   editUser.value = { ...user };
-//   showEditModal.value = true;
-// };
+// Abrir modal de edição
+const openEditModal = (user) => {
+  userToEdit.value = { ...user };
+  showEditModal.value = true;
+};
 
+// Atualizar usuário
 const updateUser = async () => {
   try {
-    await axios.put(`http://localhost:8000/api/usuarios/${editUser.value.id}`, editUser.value);
+    await axios.put(`http://localhost:8000/api/usuarios/${userToEdit.value.id}`, userToEdit.value);
     showEditModal.value = false;
     fetchUsers();
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao atualizar usuário:', error);
   }
 };
 
+// Remover usuário
 const removeUser = async (userId) => {
   try {
     await axios.delete(`http://localhost:8000/api/usuarios/${userId}`);
     fetchUsers();
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao remover usuário:', error);
   }
 };
 
-onMounted(() => {
-  fetchUsers();
-});
+onMounted(fetchUsers);
 </script>
 
 <style scoped>

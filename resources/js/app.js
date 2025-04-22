@@ -1,9 +1,9 @@
-import { createApp, h, DefineComponent } from 'vue'
+import { createApp, h } from 'vue'
 import { createInertiaApp } from '@inertiajs/vue3'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 
-const pages = import.meta.glob<DefineComponent>('./Pages/**/*.vue')
+const pages = import.meta.glob < DefineComponent > ('./Pages/**/*.vue')
 
 createInertiaApp({
     resolve: name => {

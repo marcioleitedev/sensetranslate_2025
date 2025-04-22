@@ -41,9 +41,18 @@
       <small><a href="/forgot">Esqueceu a senha?</a></small>
     </div>
   </div>
+  
+</div>
+
+<div class="text-center mt-4">
+  <h3>Login com sua Rede Social:</h3>
+  <button class="btn btn-outline-danger w-100 mb-2" @click="socialLogin('google')">Google</button>
+  <!-- <button class="btn btn-outline-primary w-100 mb-2" @click="socialLogin('facebook')">Facebook</button>
+  <button class="btn btn-outline-info w-100 mb-2" @click="socialLogin('linkedin')">LinkedIn</button> -->
 </div>
 
     </div>
+
 
     <Footer /> 
 </template>
@@ -61,6 +70,10 @@ const password = ref('')
 const mensagem = ref('')
 const tipoMensagem = ref('')
 
+const socialLogin = (provider) => {
+    window.location.href = `http://127.0.0.1:8000/api/auth/${provider}/redirect`
+}
+
 const login = async () => {
     try {
         const response = await axios.post('http://127.0.0.1:8000/api/login', {
@@ -75,7 +88,7 @@ const login = async () => {
         tipoMensagem.value = 'success'
 
         setTimeout(() => {
-            router.visit('/dashboard')  // Usando Inertia.visit() para redirecionamento
+            router.visit('/dashboard')  
         }, 1500)
     } catch (error) {
         if (error.response && error.response.data && error.response.data.message) {
