@@ -16,6 +16,10 @@
     <main class="conteudo flex-grow-1 p-4">
       <h1>Usuários</h1>
 
+      <div v-if="flashMessage" class="alert" :class="flashType" role="alert">
+      {{ flashMessage }}
+    </div>
+
       <!-- Botão de Cadastro -->
       <button class="btn btn-success mb-3 ms-auto d-flex" @click="showCreateModal = true">
         <i class="bi bi-person-add"></i> Cadastrar Usuário
@@ -157,6 +161,10 @@ const userToEdit = ref({ id: null, name: '', email: '', level: 1 });
 const users = ref([]);
 const paginationLinks = ref([]);
 
+const flashMessage = ref('');
+const flashType = ref('alert-info'); // Pode ser 'alert-success', 'alert-danger', etc.
+
+
 // Obter nome do nível
 const getLevelName = (level) => {
   switch (level) {
@@ -166,6 +174,17 @@ const getLevelName = (level) => {
     default: return 'Desconhecido';
   }
 };
+
+// Mostrar flash message
+const showFlashMessage = (message, type) => {
+  flashMessage.value = message;
+  flashType.value = type;
+
+  setTimeout(() => {
+    flashMessage.value = '';
+  }, 5000);
+};
+
 
 // Buscar usuários
 const fetchUsers = async (url = 'http://localhost:8000/api/usuarios') => {
@@ -183,8 +202,11 @@ const createUser = async () => {
   try {
     await axios.post('http://localhost:8000/api/usuarios', newUser.value);
     showCreateModal.value = false;
+    showFlashMessage(response.data.message, 'alert-success');
+    showCreateModal.value = false;
     fetchUsers();
   } catch (error) {
+    showFlashMessage('Erro ao cadastrar usuário.', 'alert-danger');
     console.error('Erro ao cadastrar usuário:', error);
   }
 };
@@ -200,8 +222,11 @@ const updateUser = async () => {
   try {
     await axios.put(`http://localhost:8000/api/usuarios/${userToEdit.value.id}`, userToEdit.value);
     showEditModal.value = false;
+    showFlashMessage(response.data.message, 'alert-success');
+    showEditModal.value = false;
     fetchUsers();
   } catch (error) {
+    showFlashMessage('Erro ao atualizar usuário.', 'alert-danger');
     console.error('Erro ao atualizar usuário:', error);
   }
 };
@@ -210,8 +235,10 @@ const updateUser = async () => {
 const removeUser = async (userId) => {
   try {
     await axios.delete(`http://localhost:8000/api/usuarios/${userId}`);
+    showFlashMessage('Usuário removido com sucesso.', 'alert-success');
     fetchUsers();
   } catch (error) {
+    showFlashMessage('Erro ao remover usuário.', 'alert-danger');
     console.error('Erro ao remover usuário:', error);
   }
 };

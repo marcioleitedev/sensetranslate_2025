@@ -18,4 +18,7 @@ Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'
 
 Route::controller(UsuariosController::class)->prefix('usuarios')->group(function () {
     Route::get('/', 'index');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'destroy');
+    Route::post('/', 'store');
 });
