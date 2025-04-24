@@ -24,4 +24,19 @@ class Service extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function budget()
+    {
+        return $this->belongsTo(Budget::class, 'budget');
+    }
+
+    public function employer()
+    {
+        return $this->belongsTo(User::class, 'employer');
+    }
+
+    public function genealogies()
+    {
+        return $this->belongsTo(Genealogy::class, 'id');
+    }
 }

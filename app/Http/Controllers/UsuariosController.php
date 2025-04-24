@@ -14,10 +14,16 @@ class UsuariosController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $lista = User::paginate(10);
-        return $lista;
+        $query = User::query();
+    
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('email', 'like', '%' . $request->search . '%');
+        }
+    
+        return $query->paginate(10);
     }
 
     /**

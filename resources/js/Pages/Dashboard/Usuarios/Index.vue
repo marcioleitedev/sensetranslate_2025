@@ -17,13 +17,23 @@
       <h1>Usuários</h1>
 
       <div v-if="flashMessage" class="alert" :class="flashType" role="alert">
-      {{ flashMessage }}
-    </div>
+        {{ flashMessage }}
+      </div>
 
       <!-- Botão de Cadastro -->
       <button class="btn btn-success mb-3 ms-auto d-flex" @click="showCreateModal = true">
         <i class="bi bi-person-add"></i> Cadastrar Usuário
       </button>
+
+      <!-- Campo de busca -->
+      <div class="input-group mb-3">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Buscar por nome ou email"
+          v-model="searchQuery"
+        />
+      </div>
 
       <!-- Tabela de Usuários -->
       <table class="table">
@@ -141,14 +151,14 @@
           </div>
         </div>
       </div>
-
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
+import debounce from 'lodash.debounce';
 import MenuLateral from '@/components/MenuLateral.vue';
 
 const showMobileMenu = ref(false);
@@ -162,10 +172,9 @@ const users = ref([]);
 const paginationLinks = ref([]);
 
 const flashMessage = ref('');
-const flashType = ref('alert-info'); // Pode ser 'alert-success', 'alert-danger', etc.
+const flashType = ref('alert-info');
+const searchQuery = ref('');
 
-
-// Obter nome do nível
 const getLevelName = (level) => {
   switch (level) {
     case 1: return 'Cliente';
@@ -175,21 +184,22 @@ const getLevelName = (level) => {
   }
 };
 
-// Mostrar flash message
 const showFlashMessage = (message, type) => {
   flashMessage.value = message;
   flashType.value = type;
-
-  setTimeout(() => {
-    flashMessage.value = '';
-  }, 5000);
+  setTimeout(() => (flashMessage.value = ''), 5000);
 };
 
-
-// Buscar usuários
-const fetchUsers = async (url = 'http://localhost:8000/api/usuarios') => {
+const fetchUsers = async (url = null) => {
   try {
-    const response = await axios.get(url);
+    let finalUrl = url || 'http://localhost:8000/api/usuarios';
+    const params = {};
+
+    if (searchQuery.value) {
+      params.search = searchQuery.value;
+    }
+
+    const response = await axios.get(finalUrl, { params });
     users.value = response.data;
     paginationLinks.value = response.data.links;
   } catch (error) {
@@ -197,41 +207,41 @@ const fetchUsers = async (url = 'http://localhost:8000/api/usuarios') => {
   }
 };
 
-// Criar novo usuário
+// Busca automática com debounce
+const debouncedFetchUsers = debounce(fetchUsers, 500);
+watch(searchQuery, () => {
+  debouncedFetchUsers();
+});
+
 const createUser = async () => {
   try {
-    await axios.post('http://localhost:8000/api/usuarios', newUser.value);
-    showCreateModal.value = false;
+    const response = await axios.post('http://localhost:8000/api/usuarios', newUser.value);
     showFlashMessage(response.data.message, 'alert-success');
     showCreateModal.value = false;
     fetchUsers();
   } catch (error) {
     showFlashMessage('Erro ao cadastrar usuário.', 'alert-danger');
-    console.error('Erro ao cadastrar usuário:', error);
+    console.error(error);
   }
 };
 
-// Abrir modal de edição
 const openEditModal = (user) => {
   userToEdit.value = { ...user };
   showEditModal.value = true;
 };
 
-// Atualizar usuário
 const updateUser = async () => {
   try {
-    await axios.put(`http://localhost:8000/api/usuarios/${userToEdit.value.id}`, userToEdit.value);
-    showEditModal.value = false;
+    const response = await axios.put(`http://localhost:8000/api/usuarios/${userToEdit.value.id}`, userToEdit.value);
     showFlashMessage(response.data.message, 'alert-success');
     showEditModal.value = false;
     fetchUsers();
   } catch (error) {
     showFlashMessage('Erro ao atualizar usuário.', 'alert-danger');
-    console.error('Erro ao atualizar usuário:', error);
+    console.error(error);
   }
 };
 
-// Remover usuário
 const removeUser = async (userId) => {
   try {
     await axios.delete(`http://localhost:8000/api/usuarios/${userId}`);
@@ -239,7 +249,7 @@ const removeUser = async (userId) => {
     fetchUsers();
   } catch (error) {
     showFlashMessage('Erro ao remover usuário.', 'alert-danger');
-    console.error('Erro ao remover usuário:', error);
+    console.error(error);
   }
 };
 

@@ -19,34 +19,34 @@
       </li>
       <li class="nav-item">
         <a class="nav-link text-white" href="/dashboard/usuarios">
-          <i class="bi bi-person-arms-up"></i>
+          <i class="bi bi-person-arms-up me-2"></i>
           <span v-if="!isCollapsed">  Usuários</span>
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link text-white" href="#">
-          <i class="bi bi-filetype-pdf"></i>
+        <a class="nav-link text-white" href="/dashboard/orcamentos">
+          <i class="bi bi-filetype-pdf me-2"></i>
           <span v-if="!isCollapsed">  Orçamentos</span>
         </a>
       </li>
-      <li class="nav-item">
+      <!-- <li class="nav-item">
         <a class="nav-link text-white" href="#">
           <i class="bi bi-people me-2"></i>
           <span v-if="!isCollapsed">  Clientes</span>
         </a>
-      </li>
+      </li> -->
       <li class="nav-item">
-        <a class="nav-link text-white" href="#">
+        <a class="nav-link text-white" href="/dashboard/servicos">
           <i class="bi bi-person-gear me-2"></i>
           <span v-if="!isCollapsed">  Serviços</span>
         </a>
       </li>
-      <li class="nav-item">
+      <!-- <li class="nav-item">
         <a class="nav-link text-white" href="#">
           <i class="bi bi-file-earmark-bar-graph-fill"></i>
           <span v-if="!isCollapsed">  Contratos</span>
         </a>
-      </li>
+      </li> -->
       <li class="nav-item">
         <a class="nav-link text-white" href="#">
           <i class="bi bi-gear me-2"></i>

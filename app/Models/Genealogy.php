@@ -18,4 +18,9 @@ class Genealogy extends Model
         'il',
         'matrimonio'
     ];
+
+    public function service()
+    {
+        return $this->belongsTo(Service::class);
+    }
 }
