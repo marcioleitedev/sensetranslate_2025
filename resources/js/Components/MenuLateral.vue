@@ -47,12 +47,12 @@
           <span v-if="!isCollapsed">  Contratos</span>
         </a>
       </li> -->
-      <li class="nav-item">
+      <!-- <li class="nav-item">
         <a class="nav-link text-white" href="#">
           <i class="bi bi-gear me-2"></i>
           <span v-if="!isCollapsed">  Configurações</span>
         </a>
-      </li>
+      </li> -->
       <li class="nav-item">
         <a class="nav-link text-white" href="#">
           <i class="bi bi-box-arrow-right me-2"></i>
