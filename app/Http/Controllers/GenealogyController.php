@@ -32,34 +32,56 @@ class GenealogyController extends Controller
 
 
     /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        //
+
+        $service = Service::where('id', $id)->first();
+        $genealogy = Genealogy::where('service', $id)->get();
+
+        return response()->json([
+            'service' => $service,
+            'genealogy' => $genealogy,
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string',
+            'type' => 'required|in:1,2',
+            'origin' => 'required|string',
+            'smaller' => 'required|boolean',
+        ]);
+
+        Genealogy::create($request->all());
+        return back();
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $node = Genealogy::findOrFail($id);
+        $node->update($request->all());
+        return back();
+    }
+
+    public function delete($id)
+    {
+        $node = Genealogy::findOrFail($id);
+        $node->delete();
+        return back();
+    }
+
+    public function getTree($service)
+    {
+        // dd($service);
+        $serviceQuery = Service::where('id', $service)->first();
+        $genealogy = Genealogy::where('service', $service)->get();
+
+        return response()->json([
+            'service' => $serviceQuery,
+            'genealogy' => $genealogy,
+        ]);
     }
 }

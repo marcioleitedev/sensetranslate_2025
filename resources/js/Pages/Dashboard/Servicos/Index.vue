@@ -36,6 +36,7 @@
           <th>Status</th>
           <th>Pagamento</th>
           <th>Período</th>
+          <th>Arvore</th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -47,6 +48,11 @@
           <td>{{ service.status }}</td>
           <td>{{ service.method_payment }}</td>
           <td>{{ formatDate(service.start) }} - {{ formatDate(service.end) }}</td>
+        <td>
+  <a :href="`/dashboard/arvore/${service.id}`" class="btn btn-outline-success btn-sm">
+    <i class="bi bi-tree-fill"></i> Ver Árvore
+  </a>
+</td>
           <td>
             <button class="btn btn-primary me-1" @click="openEditModal(service)">
               <i class="bi bi-pencil-square"></i>

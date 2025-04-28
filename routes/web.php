@@ -20,9 +20,10 @@ Route::prefix('dashboard')->group(function () {
     // Adicione mais rotas conforme sua necessidade
 
     // Rota de Orçamentos
-   Route::get('/orcamentos' , fn() => Inertia::render('Dashboard/Orcamentos/Index'));
+    Route::get('/orcamentos', fn() => Inertia::render('Dashboard/Orcamentos/Index'));
 
     // Rota de Serviços
-   Route::get('/servicos' , fn() => Inertia::render('Dashboard/Servicos/Index'));
+    Route::get('/servicos', fn() => Inertia::render('Dashboard/Servicos/Index'));
 
+    Route::get('/arvore/{id}', fn($id) => Inertia::render('Dashboard/Arvore/Index',  ['id' => $id]));
 });

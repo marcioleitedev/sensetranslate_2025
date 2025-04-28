@@ -38,6 +38,7 @@
             <th>Email</th>
             <th>Telefone</th>
             <th>Preço</th>
+    
             <th>Status</th>
             <th>Ações</th>
           </tr>
@@ -49,6 +50,7 @@
             <td>{{ budget.email }}</td>
             <td>{{ budget.phone }}</td>
             <td>{{ budget.price }}</td>
+
             <td>{{ getStatusName(budget.status) }}</td>
             <td>
               <button class="btn btn-primary me-1" @click="openEditModal(budget)">
