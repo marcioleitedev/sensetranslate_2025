@@ -12,7 +12,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import TreeNode from '@/Components/TreeNode.vue'; // Importa o componente separado
+import TreeNode from '@/Components/TreeNode.vue'; 
+
+import { usePage } from '@inertiajs/vue3'; 
 
 const nodes = ref([]);
 
@@ -54,27 +56,12 @@ async function loadGenealogyTree(id) {
   }
 }
 
-// Quando o componente monta
+const page = usePage();
+const serviceId = page.props.id; 
+
+console.log("Aqui o ID recebido:", serviceId);
 onMounted(() => {
-  const serviceId = 1160;
   loadGenealogyTree(serviceId);
 });
 </script>
 
-<style scoped>
-.tree {
-  list-style-type: none;
-  padding-left: 20px;
-}
-
-.node {
-  padding: 5px;
-  border: 1px solid #ccc;
-  margin: 5px;
-  display: inline-block;
-}
-
-ul {
-  padding-left: 20px;
-}
-</style>
