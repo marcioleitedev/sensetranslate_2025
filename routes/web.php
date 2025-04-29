@@ -26,4 +26,6 @@ Route::prefix('dashboard')->group(function () {
     Route::get('/servicos', fn() => Inertia::render('Dashboard/Servicos/Index'));
 
     Route::get('/arvore/{id}', fn($id) => Inertia::render('Dashboard/Arvore/Index',  ['id' => $id]));
+
+    Route::get('/pdf/{id}', fn($id) => Inertia::render('Dashboard/Arvore_pdf/Index',  ['id' => $id]));
 });

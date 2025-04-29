@@ -50,4 +50,5 @@ Route::controller(GenealogyController::class)->prefix('genealogy')->group(functi
     Route::put('/update/{id}', [GenealogyController::class, 'update']);
     Route::delete('/delete/{id}', [GenealogyController::class, 'delete']);
     Route::get('/tree/{service}', [GenealogyController::class, 'getTree']);
+    Route::get('/genealogy/clean-tree/{service}', [GenealogyController::class, 'getCleanTree']);
 });

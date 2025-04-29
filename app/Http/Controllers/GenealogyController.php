@@ -84,4 +84,16 @@ class GenealogyController extends Controller
             'genealogy' => $genealogy,
         ]);
     }
+
+    // GenealogyController.php
+    public function getCleanTree($service)
+    {
+        $serviceQuery = Service::where('id', $service)->first();
+        $genealogy = Genealogy::where('service', $service)->get();
+
+        return response()->json([
+            'service' => $serviceQuery,
+            'genealogy' => $genealogy,
+        ]);
+    }
 }

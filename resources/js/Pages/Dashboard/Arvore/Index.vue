@@ -1,4 +1,5 @@
 <template>
+  <!-- Link para o Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
 
   <div class="d-flex">
@@ -99,15 +100,27 @@
             <TreeNode v-for="node in nodes" :key="node.id" :node="node" @edit="openEditModal" @delete="deleteMember" />
           </ul>
         </div>
+
+        <!-- Visualizar PDF - Novo Botão -->
+        <div class="col-12 d-flex flex-column align-items-center mt-1">
+          <div class="mt-auto">
+             <Link :href="`/dashboard/pdf/${serviceId}`" class="btn btn-success mb-4" target="blank">
+    Visualizar PDF
+  </Link>
+          </div>
+        </div>
+
       </div>
     </main>
   </div>
 </template>
 
 <style scoped>
+
 .conteudo {
   margin-left: 220px;
   transition: margin-left 0.3s ease;
+  background: #ffffff;
 }
 
 @media (max-width: 700px) {
@@ -151,6 +164,8 @@ import axios from 'axios';
 import TreeNode from '@/Components/TreeNode.vue';
 import MenuLateral from '@/components/MenuLateral.vue';
 import { usePage } from '@inertiajs/vue3';
+
+import { Link } from '@inertiajs/vue3';
 
 // Referências de dados
 const showMobileMenu = ref(false);
@@ -250,7 +265,7 @@ function resetForm() {
 function openEditModal(node) {
   form.value = { ...node }; // Preenche o formulário com os dados do nó selecionado
   editModal.value = true; // Abre o modal de edição
-   showModal.value = true; // Abre o modal de edição
+  showModal.value = true; // Abre o modal de edição
 }
 
 // Deleta o membro
@@ -263,6 +278,11 @@ async function deleteMember(node) {
     console.error('Erro ao deletar membro:', error);
     alert('Erro ao deletar o membro.');
   }
+}
+
+// Função para visualizar PDF
+function viewPdf() {
+  Inertia.visit(`/dashboard/pdf/${serviceId}`);
 }
 
 // Carrega a árvore ao montar o componente
