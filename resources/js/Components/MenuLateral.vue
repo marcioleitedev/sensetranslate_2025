@@ -2,61 +2,45 @@
   <aside :class="['menu-lateral', { 'collapsed': isCollapsed, 'show': showMobileMenu }]">
     <div class="d-flex justify-content-between align-items-center px-3 py-2">
       <h5 class="text-white m-0" v-if="!isCollapsed">Menu</h5>
-      <button
-        class="btn btn-sm btn-light"
-        @click="toggleCollapse"
-      >
+    
+      <button class="btn btn-sm btn-light" @click="toggleCollapse">
         <i class="bi" :class="isCollapsed ? 'bi-arrow-right' : 'bi-arrow-left'"></i>
       </button>
+    
+    </div>
+    <div class="flex-column px-2">
+      <h3 class="text-white fs-6">{{  user.name }}</h3>
     </div>
 
     <ul class="nav flex-column px-2">
       <li class="nav-item">
         <a class="nav-link text-white" href="/dashboard">
           <i class="bi bi-speedometer2 me-2"></i>
-          <span v-if="!isCollapsed"> Dashboard</span>
+          <span v-if="!isCollapsed">Dashboard</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link text-white" href="/dashboard/usuarios">
           <i class="bi bi-person-arms-up me-2"></i>
-          <span v-if="!isCollapsed">  Usuários</span>
+          <span v-if="!isCollapsed">Usuários</span>
         </a>
       </li>
       <li class="nav-item">
         <a class="nav-link text-white" href="/dashboard/orcamentos">
           <i class="bi bi-filetype-pdf me-2"></i>
-          <span v-if="!isCollapsed">  Orçamentos</span>
+          <span v-if="!isCollapsed">Orçamentos</span>
         </a>
       </li>
-      <!-- <li class="nav-item">
-        <a class="nav-link text-white" href="#">
-          <i class="bi bi-people me-2"></i>
-          <span v-if="!isCollapsed">  Clientes</span>
-        </a>
-      </li> -->
       <li class="nav-item">
         <a class="nav-link text-white" href="/dashboard/servicos">
           <i class="bi bi-person-gear me-2"></i>
-          <span v-if="!isCollapsed">  Serviços</span>
+          <span v-if="!isCollapsed">Serviços</span>
         </a>
       </li>
-      <!-- <li class="nav-item">
-        <a class="nav-link text-white" href="#">
-          <i class="bi bi-file-earmark-bar-graph-fill"></i>
-          <span v-if="!isCollapsed">  Contratos</span>
-        </a>
-      </li> -->
-      <!-- <li class="nav-item">
-        <a class="nav-link text-white" href="#">
-          <i class="bi bi-gear me-2"></i>
-          <span v-if="!isCollapsed">  Configurações</span>
-        </a>
-      </li> -->
       <li class="nav-item">
-        <a class="nav-link text-white" href="#">
+        <a class="nav-link text-white" href="#" @click.prevent="logout">
           <i class="bi bi-box-arrow-right me-2"></i>
-          <span v-if="!isCollapsed">  Sair</span>
+          <span v-if="!isCollapsed">Sair</span>
         </a>
       </li>
     </ul>
@@ -64,7 +48,19 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { defineProps, defineEmits, ref, onMounted, onBeforeUnmount } from 'vue'
+import axios from 'axios'
+
+import { jwtDecode } from 'jwt-decode'
+
+const isAuthenticated = ref(false)
+const user = ref({
+  name: '',
+  email: '',
+  level: null,
+  decodedToken: null,
+})
+
 
 const props = defineProps({
   showMobileMenu: Boolean
@@ -73,26 +69,74 @@ const emit = defineEmits(['update:showMobileMenu'])
 
 const isCollapsed = ref(false)
 
+
+// Toggle do menu lateral
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value
 }
 
-// fecha menu no mobile se clicar fora dele
+// Função para fechar o menu no mobile ao clicar fora
 const handleClickOutside = (e) => {
   const menu = document.querySelector('.menu-lateral')
-  if (
-    props.showMobileMenu &&
-    menu &&
-    !menu.contains(e.target) &&
-    !e.target.closest('.toggle-btn')
-  ) {
+  if (props.showMobileMenu && menu && !menu.contains(e.target) && !e.target.closest('.toggle-btn')) {
     emit('update:showMobileMenu', false)
   }
 }
 
 onMounted(() => {
+  const token = localStorage.getItem('token')
+
+  if (!token) {
+    throw new Error('Token não encontrado')
+  }
+
+  // Setar no axios
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+  console.log('Token configurado no axios:', axios.defaults.headers.common['Authorization'])
+
+  // Decodificar token JWT
+  try {
+    const decoded = jwtDecode(token)
+
+    // Guardar dados do usuário
+    user.value = {
+      id: decoded.sub,
+      name: decoded.name,
+      email: decoded.email,
+      level: decoded.level,
+      // decodedToken: decoded,
+    }
+
+    isAuthenticated.value = true
+
+    console.log('Token decodificado:', user)
+  } catch (error) {
+    console.error('Erro ao decodificar token:', error)
+  }
+
   document.addEventListener('click', handleClickOutside)
 })
+
+// Função para buscar o usuário autenticado
+const getUser = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    if (!token) throw new Error('Token não encontrado')
+
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+    const { data } = await axios.get('http://localhost:8000/api/me') 
+    user.value = data
+  } catch (error) {
+    logout() 
+  }
+}
+
+// Função de logout
+const logout = () => {
+  localStorage.removeItem('token')
+  delete axios.defaults.headers.common['Authorization']
+  window.location.href = '/login' // Redireciona para a página de login
+}
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)

@@ -18,7 +18,6 @@ Route::prefix('dashboard')->group(function () {
     Route::get('/usuarios/create', fn() => Inertia::render('Dashboard/Usuarios/Create'));
     Route::get('/usuarios/edit/{id}', fn($id) => Inertia::render('Dashboard/Usuarios/Edit', ['id' => $id]));
     // Adicione mais rotas conforme sua necessidade
-
     // Rota de Orçamentos
     Route::get('/orcamentos', fn() => Inertia::render('Dashboard/Orcamentos/Index'));
 
