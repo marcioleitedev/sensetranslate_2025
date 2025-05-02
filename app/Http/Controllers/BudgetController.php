@@ -95,7 +95,7 @@ class BudgetController extends Controller
             'phone' => 'required|string',
             'price' => 'required|numeric',
             'status' => 'required|integer',
-            'content' => 'required|array',
+            'content' => 'required|string',
         ]);
 
         $validated['content'] = json_encode($validated['content']);

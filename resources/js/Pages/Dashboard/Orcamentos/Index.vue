@@ -158,8 +158,7 @@
                   </select>
                 </div>
 
-                <input type="hidden" v-model="newBudget.user_id" />
-      
+ 
                 <button type="submit" class="btn btn-primary">Atualizar</button>
               </form>
             </div>

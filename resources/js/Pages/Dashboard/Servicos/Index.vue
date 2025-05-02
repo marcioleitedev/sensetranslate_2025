@@ -11,6 +11,10 @@
   <main class="conteudo flex-grow-1 p-4">
     <h1 class="mb-4">Lista de Serviços</h1>
 
+          <!-- Flash Message -->
+      <div v-if="flashMessage" class="alert" :class="flashType" role="alert">
+        {{ flashMessage }}
+      </div>
     <!-- Campo de busca -->
     <div class="input-group mb-3">
       <input
@@ -134,6 +138,17 @@ const currentService = ref({
   start: '', end: '', contract: '', obs: ''
 });
 
+const flashMessage = ref('');
+const flashClass = ref('');
+
+const showFlashMessage = (message, cssClass = 'alert-success') => {
+  flashMessage.value = message;
+  flashClass.value = cssClass;
+  setTimeout(() => {
+    flashMessage.value = '';
+  }, 4000);
+};
+
 // Campos dinâmicos do modal
 const formFields = [
   { model: 'name', label: 'Nome', type: 'input', inputType: 'text' },
@@ -198,6 +213,8 @@ const removeService = async (id) => {
   if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
   try {
     await axios.delete(`http://localhost:8000/api/services/${id}`);
+  const message = response.data.message || 'Serviço removido com sucesso.';
+    showFlashMessage(message, 'alert-success');
     fetchServices();
   } catch (error) {
     console.error('Erro ao remover serviço:', error);
