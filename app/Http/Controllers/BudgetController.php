@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Budget;
+use App\Models\Service;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class BudgetController extends Controller
 {
@@ -41,16 +43,14 @@ class BudgetController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'user_id' => 'required|string',
             'name' => 'required|string',
             'email' => 'required|email',
             'phone' => 'required|string',
             'price' => 'required|numeric',
             'status' => 'required|integer',
-            'content' => 'required|array',  // Você já deve validar como array
+            // 'content' => 'required|array',  // Você já deve validar como array
         ]);
-
-        // Converta o conteúdo para string JSON
-        $validated['content'] = json_encode($validated['content']);  // Converte para JSON
 
 
         try {
@@ -89,21 +89,39 @@ class BudgetController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            // 'user_id' => 'required|integer',
-            'name' => 'required|string|max:255',
+        $validated = $request->validate([
+            'name' => 'required|string',
             'email' => 'required|email',
-            'phone' => 'required|string|max:15',
-            // 'content' => 'required|string',
-            // 'price' => 'required|numeric',
-            // 'payment_method' => 'required|string',
-            // 'status' => 'required|string',
-            // 'data' => 'required|date',
+            'phone' => 'required|string',
+            'price' => 'required|numeric',
+            'status' => 'required|integer',
+            'content' => 'required|array',
         ]);
+
+        $validated['content'] = json_encode($validated['content']);
 
         try {
             $budget = Budget::findOrFail($id);
-            $budget->update($request->all());
+            $budget->update($validated);
+
+            if ($validated['status'] == 2) {
+                $dateService = [
+                    "user_id" => $budget->user_id ?? null,
+                    "budget" => $budget->id ?? null,
+                    "employer" => $budget->user_id ?? null,
+                    "name" => $budget->name,
+                    "method_payment" => null,
+                    "price" => $budget->price,
+                    "status" => 1,
+                    "contract" => null,
+                    "data" => now()->format('Y-m-d H:i:s'),
+                    "obs" => null,
+                    "start" => null,
+                    "end" => null,
+                    "updated_at" => now()->format('Y-m-d H:i:s')
+                ];
+            }
+            $service = Service::create($dateService);
 
             return response()->json([
                 'message' => 'Orçamento atualizado com sucesso.',

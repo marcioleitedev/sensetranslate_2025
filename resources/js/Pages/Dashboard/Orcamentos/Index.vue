@@ -97,7 +97,7 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Criar Orçamento</h5>
+              <h5 class="modal-title">Criar Orçamento {{  user.id }}</h5>
               <button type="button" class="btn-close" @click="showCreateModal = false"></button>
             </div>
             <div class="modal-body">
@@ -120,6 +120,7 @@
                     <option value="3">Rejeitado</option>
                   </select>
                 </div>
+                <input type="hidden" :value="user.id" name="user_id" />
 
                 <button type="submit" class="btn btn-success">Salvar</button>
               </form>
@@ -133,7 +134,7 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Editar Orçamento</h5>
+              <h5 class="modal-title">Editar Orçamento </h5>
               <button type="button" class="btn-close" @click="showEditModal = false"></button>
             </div>
             <div class="modal-body">
@@ -157,6 +158,8 @@
                   </select>
                 </div>
 
+                <input type="hidden" v-model="newBudget.user_id" />
+      
                 <button type="submit" class="btn btn-primary">Atualizar</button>
               </form>
             </div>
@@ -168,19 +171,63 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch , onMounted } from 'vue';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
 import MenuLateral from '@/components/MenuLateral.vue';
 import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import { jwtDecode } from 'jwt-decode'
+
+const isAuthenticated = ref(false)
+const user = ref({
+  id: '',
+  name: '',
+  email: '',
+  level: null,
+  decodedToken: null,
+})
+
+onMounted(() => {
+  const token = localStorage.getItem('token')
+
+  if (!token) {
+    throw new Error('Token não encontrado')
+  }
+
+  // Setar no axios
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+  console.log('Token configurado no axios:', axios.defaults.headers.common['Authorization'])
+
+  // Decodificar token JWT
+  try {
+    const decoded = jwtDecode(token)
+
+    // Guardar dados do usuário
+    user.value = {
+      id: decoded.sub,
+      name: decoded.name,
+      email: decoded.email,
+      level: decoded.level,
+      // decodedToken: decoded,
+    }
+
+    isAuthenticated.value = true
+
+    console.log('Token decodificado:', user)
+  } catch (error) {
+    console.error('Erro ao decodificar token:', error)
+  }
+
+  document.addEventListener('click', handleClickOutside)
+})
 
 const showMobileMenu = ref(false);
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 
-const newBudget = ref({ name: '', email: '', phone: '', price: '', status: 1, content: '' });
-const budgetToEdit = ref({ id: null, name: '', email: '', phone: '', price: '', status: 1, content: '' });
+const newBudget = ref({ name: '', email: '', phone: '', price: '', status: 1, content: '' , user_id: ''});
+const budgetToEdit = ref({ id: null, name: '', email: '', phone: '', price: '', status: 1, content: '' , user_id: '' });
 
 const budgets = ref([]);
 const paginationLinks = ref([]);
@@ -193,7 +240,8 @@ const fields = {
   name: 'Nome',
   email: 'Email',
   phone: 'Telefone',
-  price: 'Preço'
+  price: 'Preço',
+  content: 'Content'
 };
 
 const getStatusName = (status) => {
@@ -234,15 +282,21 @@ watch(searchTerm, () => debouncedFetch());
 
 const createBudget = async () => {
   try {
+
+    newBudget.value.user_id = user.value.id; // garante que é número
+    console.log('Payload enviado:', newBudget.value);
+
     await axios.post('http://localhost:8000/api/budgets', newBudget.value);
+
+    showFlashMessage('Orçamento criado com sucesso!', 'alert-success');
     showCreateModal.value = false;
-    showFlashMessage('Orçamento criado com sucesso.', 'alert-success');
     fetchBudgets();
   } catch (error) {
-    showFlashMessage('Erro ao criar orçamento.', 'alert-danger');
-    console.error(error);
+    console.error('Erro ao criar orçamento:', error);
+    showFlashMessage('Erro ao criar orçamento', 'alert-danger');
   }
 };
+
 
 const openEditModal = (budget) => {
   budgetToEdit.value = { ...budget };
