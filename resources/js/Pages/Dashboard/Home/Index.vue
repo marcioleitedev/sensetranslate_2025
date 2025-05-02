@@ -18,17 +18,65 @@
 
     <!-- Conteúdo -->
     <main class="conteudo flex-grow-1 p-4">
-      <h1>Bem-vindo à Dashboard</h1>
-      <p>Este é o conteúdo principal da página.</p>
+      <h1>Bem-vindo à Dashboard  </h1>
+      <h3>{{  user.name }}</h3>
+      <p>Este é o conteúdo principal da página. </p>
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import {  ref, onMounted } from 'vue'
+import axios from 'axios'
+
 import MenuLateral from '@/components/MenuLateral.vue'
 
 const showMobileMenu = ref(false)
+import { jwtDecode } from 'jwt-decode'
+
+
+const isAuthenticated = ref(false)
+const user = ref({
+  name: '',
+  email: '',
+  level: null,
+  decodedToken: null,
+})
+
+onMounted(() => {
+  const token = localStorage.getItem('token')
+
+  if (!token) {
+    throw new Error('Token não encontrado')
+  }
+
+  // Setar no axios
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+  console.log('Token configurado no axios:', axios.defaults.headers.common['Authorization'])
+
+  // Decodificar token JWT
+  try {
+    const decoded = jwtDecode(token)
+
+    // Guardar dados do usuário
+    user.value = {
+      id: decoded.sub,
+      name: decoded.name,
+      email: decoded.email,
+      level: decoded.level,
+      // decodedToken: decoded,
+    }
+
+    isAuthenticated.value = true
+
+    console.log('Token decodificado:', user)
+  } catch (error) {
+    console.error('Erro ao decodificar token:', error)
+  }
+
+  document.addEventListener('click', handleClickOutside)
+})
+
 </script>
 
 <style scoped>

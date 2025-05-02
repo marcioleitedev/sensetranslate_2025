@@ -1,22 +1,25 @@
 <template>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
   <div class="d-flex">
+    <!-- Botão Menu Mobile -->
     <button class="btn btn-primary d-md-none toggle-btn" @click="showMobileMenu = !showMobileMenu">
       <i class="bi bi-list"></i>
     </button>
 
+    <!-- Menu Lateral -->
     <MenuLateral :showMobileMenu="showMobileMenu" @update:showMobileMenu="showMobileMenu = $event" />
 
     <main class="conteudo flex-grow-1 p-4">
       <h1>Orçamentos</h1>
 
+      <!-- Flash Message -->
       <div v-if="flashMessage" class="alert" :class="flashType" role="alert">
         {{ flashMessage }}
       </div>
 
       <!-- Botão de Cadastro -->
       <button class="btn btn-success mb-3 ms-auto d-flex" @click="showCreateModal = true">
-        <i class="bi bi-file-earmark-plus"></i> Criar Orçamento
+        <i class="bi bi-file-earmark-plus me-2"></i> Criar Orçamento
       </button>
 
       <!-- Campo de busca -->
@@ -38,7 +41,7 @@
             <th>Email</th>
             <th>Telefone</th>
             <th>Preço</th>
-    
+            <th>Whatsapp</th>
             <th>Status</th>
             <th>Ações</th>
           </tr>
@@ -50,7 +53,15 @@
             <td>{{ budget.email }}</td>
             <td>{{ budget.phone }}</td>
             <td>{{ budget.price }}</td>
-
+            <td>
+              <a
+    :href="getWhatsAppLink(budget.phone, budget.content)"
+    target="_blank"
+    class="btn btn-success btn-sm"
+  >
+    <i class="bi bi-whatsapp"></i> Enviar
+  </a>
+            </td>
             <td>{{ getStatusName(budget.status) }}</td>
             <td>
               <button class="btn btn-primary me-1" @click="openEditModal(budget)">
@@ -91,22 +102,16 @@
             </div>
             <div class="modal-body">
               <form @submit.prevent="createBudget">
-                <div class="mb-3">
-                  <label class="form-label">Nome</label>
-                  <input v-model="newBudget.name" type="text" class="form-control" required />
+                <div class="mb-3" v-for="(label, key) in fields" :key="key">
+                  <label class="form-label">{{ label }}</label>
+                  <input v-model="newBudget[key]" :type="key === 'email' ? 'email' : key === 'price' ? 'number' : 'text'" class="form-control" required />
                 </div>
+
                 <div class="mb-3">
-                  <label class="form-label">Email</label>
-                  <input v-model="newBudget.email" type="email" class="form-control" required />
+                  <label class="form-label">Conteúdo do Orçamento (HTML)</label>
+                  <quill-editor v-model:content="newBudget.content" />
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Telefone</label>
-                  <input v-model="newBudget.phone" type="text" class="form-control" required />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Preço</label>
-                  <input v-model="newBudget.price" type="number" class="form-control" required />
-                </div>
+
                 <div class="mb-3">
                   <label class="form-label">Status</label>
                   <select v-model="newBudget.status" class="form-select">
@@ -115,6 +120,7 @@
                     <option value="3">Rejeitado</option>
                   </select>
                 </div>
+
                 <button type="submit" class="btn btn-success">Salvar</button>
               </form>
             </div>
@@ -132,22 +138,16 @@
             </div>
             <div class="modal-body">
               <form @submit.prevent="updateBudget">
-                <div class="mb-3">
-                  <label class="form-label">Nome</label>
-                  <input v-model="budgetToEdit.name" type="text" class="form-control" required />
+                <div class="mb-3" v-for="(label, key) in fields" :key="key">
+                  <label class="form-label">{{ label }}</label>
+                  <input v-model="budgetToEdit[key]" :type="key === 'email' ? 'email' : key === 'price' ? 'number' : 'text'" class="form-control" required />
                 </div>
+
                 <div class="mb-3">
-                  <label class="form-label">Email</label>
-                  <input v-model="budgetToEdit.email" type="email" class="form-control" required />
+                  <label class="form-label">Conteúdo do Orçamento (HTML)</label>
+                  <quill-editor v-model:content="budgetToEdit.content" />
                 </div>
-                <div class="mb-3">
-                  <label class="form-label">Telefone</label>
-                  <input v-model="budgetToEdit.phone" type="text" class="form-control" required />
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">Preço</label>
-                  <input v-model="budgetToEdit.price" type="number" class="form-control" required />
-                </div>
+
                 <div class="mb-3">
                   <label class="form-label">Status</label>
                   <select v-model="budgetToEdit.status" class="form-select">
@@ -156,6 +156,7 @@
                     <option value="3">Rejeitado</option>
                   </select>
                 </div>
+
                 <button type="submit" class="btn btn-primary">Atualizar</button>
               </form>
             </div>
@@ -167,23 +168,33 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, watch } from 'vue';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
 import MenuLateral from '@/components/MenuLateral.vue';
+import { QuillEditor } from '@vueup/vue-quill';
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
 const showMobileMenu = ref(false);
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
 
-const newBudget = ref({ name: '', email: '', phone: '', price: '', status: 1 });
-const budgetToEdit = ref({ id: null, name: '', email: '', phone: '', price: '', status: 1 });
+const newBudget = ref({ name: '', email: '', phone: '', price: '', status: 1, content: '' });
+const budgetToEdit = ref({ id: null, name: '', email: '', phone: '', price: '', status: 1, content: '' });
 
 const budgets = ref([]);
 const paginationLinks = ref([]);
 const flashMessage = ref('');
 const flashType = ref('alert-info');
 const searchTerm = ref('');
+
+// Campos reutilizáveis
+const fields = {
+  name: 'Nome',
+  email: 'Email',
+  phone: 'Telefone',
+  price: 'Preço'
+};
 
 const getStatusName = (status) => {
   switch (status) {
@@ -192,6 +203,12 @@ const getStatusName = (status) => {
     case 3: return 'Rejeitado';
     default: return 'Desconhecido';
   }
+};
+
+const getWhatsAppLink = (phone, content) => {
+  const cleaned = phone.replace(/\D/g, '');
+  const encodedContent = encodeURIComponent(content); // Codifica o conteúdo para ser usado na URL
+  return `https://wa.me/55${cleaned}?text=${encodedContent}`;
 };
 
 const showFlashMessage = (message, type) => {
@@ -255,10 +272,14 @@ const removeBudget = async (budgetId) => {
   }
 };
 
-onMounted(fetchBudgets);
+fetchBudgets();
 </script>
 
 <style scoped>
+.modal {
+  background: rgba(0, 0, 0, 0.5);
+}
+
 .conteudo {
   margin-left: 220px;
   transition: margin-left 0.3s ease;
@@ -275,13 +296,5 @@ onMounted(fetchBudgets);
     left: 15px;
     z-index: 1100;
   }
-}
-
-.modal {
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal-dialog {
-  margin-top: 10vh;
 }
 </style>

@@ -14,16 +14,16 @@ class BudgetController extends Controller
     {
         try {
             $query = Budget::query();
-    
+
             if ($request->has('search') && !empty($request->search)) {
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%")
-                      ->orWhere('phone', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
                 });
             }
-    
+
             $budgets = $query->orderBy('id', 'desc')->paginate(10);
             return response()->json($budgets);
         } catch (\Exception $e) {
@@ -33,27 +33,28 @@ class BudgetController extends Controller
             ], 500);
         }
     }
-    
+
 
     /**
      * Cria um novo orçamento.
      */
     public function store(Request $request)
     {
-        $request->validate([
-            // 'user_id' => 'required|integer',
-            'name' => 'required|string|max:255',
+        $validated = $request->validate([
+            'name' => 'required|string',
             'email' => 'required|email',
-            'phone' => 'required|string|max:15',
-            // 'content' => 'required|string',
-            // 'price' => 'required|numeric',
-            // 'payment_method' => 'required|string',
-            // 'status' => 'required|string',
-            // 'data' => 'required|date',
+            'phone' => 'required|string',
+            'price' => 'required|numeric',
+            'status' => 'required|integer',
+            'content' => 'required|array',  // Você já deve validar como array
         ]);
 
+        // Converta o conteúdo para string JSON
+        $validated['content'] = json_encode($validated['content']);  // Converte para JSON
+
+
         try {
-            $budget = Budget::create($request->all());
+            $budget = Budget::create($validated);
 
             return response()->json([
                 'message' => 'Orçamento criado com sucesso.',
