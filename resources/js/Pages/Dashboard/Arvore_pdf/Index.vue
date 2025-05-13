@@ -21,7 +21,7 @@
 <style>
 body {
   background: #ffffff;
-  background-image: url('/images/translate.jpg');
+  background-image: url('/images/arvore.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
