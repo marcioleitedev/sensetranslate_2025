@@ -298,7 +298,13 @@ const createBudget = async () => {
 
 
 const openEditModal = (budget) => {
+  // Verificar se os dados estão sendo passados corretamente
+  console.log('Abrindo modal para editar o orçamento', budget);
+
+  // Copiar os dados do orçamento para a variável de edição
   budgetToEdit.value = { ...budget };
+
+  // Exibir o modal
   showEditModal.value = true;
 };
 

@@ -48,12 +48,6 @@ class GenealogyController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'type' => 'required|in:1,2',
-            'origin' => 'required|string',
-            'smaller' => 'required|boolean',
-        ]);
 
         Genealogy::create($request->all());
         return back();
@@ -75,7 +69,6 @@ class GenealogyController extends Controller
 
     public function getTree($service)
     {
-        // dd($service);
         $serviceQuery = Service::where('id', $service)->first();
         $genealogy = Genealogy::where('service', $service)->get();
 

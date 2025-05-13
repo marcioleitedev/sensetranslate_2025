@@ -104,9 +104,9 @@
         <!-- Visualizar PDF - Novo Botão -->
         <div class="col-12 d-flex flex-column align-items-center mt-1">
           <div class="mt-auto">
-             <Link :href="`/dashboard/pdf/${serviceId}`" class="btn btn-success mb-4" target="blank">
-    Visualizar PDF
-  </Link>
+            <a :href="`/dashboard/pdf/${serviceId}`" class="btn btn-success mb-4" target="_blank" rel="noopener">
+  Visualizar PDF
+</a>
           </div>
         </div>
 
@@ -230,17 +230,27 @@ function organizeTree(members) {
 async function submitForm() {
   try {
     const payload = { ...form.value, service: serviceId };
-    await axios.post('http://127.0.0.1:8000/api/genealogy', payload);
 
-    alert('Membro cadastrado com sucesso!');
+    if (form.value.id) {
+      // Atualização
+      await axios.put(`http://127.0.0.1:8000/api/genealogy/${form.value.id}`, payload);
+      alert('Membro atualizado com sucesso!');
+    } else {
+      // Criação
+      await axios.post('http://127.0.0.1:8000/api/genealogy', payload);
+      alert('Membro cadastrado com sucesso!');
+    }
+
     resetForm();
     closeModal();
     await loadGenealogyTree();
+
   } catch (error) {
-    console.error('Erro ao cadastrar:', error);
-    alert('Erro ao cadastrar o membro.');
+    console.error('Erro ao salvar:', error);
+    alert('Erro ao salvar o membro.');
   }
 }
+
 
 // Fecha o modal
 function closeModal() {
@@ -251,6 +261,7 @@ function closeModal() {
 // Reseta o formulário
 function resetForm() {
   form.value = {
+    id: null,
     name: '',
     origin: '',
     type: 1,

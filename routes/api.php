@@ -43,12 +43,10 @@ Route::controller(ServiceController::class)->prefix('services')->group(function 
 Route::controller(GenealogyController::class)->prefix('genealogy')->group(function () {
     Route::get('/', 'index');
     Route::get('/{id}', 'show');
-    Route::delete('/{id}', 'destroy');
+    Route::put('/{id}', 'update');
+    Route::delete('/{id}', 'delete');
     Route::post('/', 'store');
 
-    Route::post('/store', [GenealogyController::class, 'store']);
-    Route::put('/update/{id}', [GenealogyController::class, 'update']);
-    Route::delete('/delete/{id}', [GenealogyController::class, 'delete']);
     Route::get('/tree/{service}', [GenealogyController::class, 'getTree']);
     Route::get('/genealogy/clean-tree/{service}', [GenealogyController::class, 'getCleanTree']);
 });

@@ -21,7 +21,7 @@
 <style>
 body {
   background: #ffffff;
-  background-image: url('/images/arvore-plano-de-fundo.pdf');
+  background-image: url('/images/translate.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
