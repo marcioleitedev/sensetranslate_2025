@@ -19,7 +19,8 @@
     <!-- Conteúdo -->
     <main class="conteudo flex-grow-1 p-4">
       <h1>Bem-vindo à Dashboard  </h1>
-      <h3>{{  user.name }}</h3>
+      <h3>{{  user.name }} </h3>
+      <h3>{{  user.level }} </h3>
       <p>Este é o conteúdo principal da página. </p>
     </main>
   </div>

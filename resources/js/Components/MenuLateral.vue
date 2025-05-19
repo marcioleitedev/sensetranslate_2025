@@ -19,7 +19,7 @@
           <span v-if="!isCollapsed">Dashboard</span>
         </a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" v-if="user.level === 3" >
         <a class="nav-link text-white" href="/dashboard/usuarios">
           <i class="bi bi-person-arms-up me-2"></i>
           <span v-if="!isCollapsed">Usuários</span>

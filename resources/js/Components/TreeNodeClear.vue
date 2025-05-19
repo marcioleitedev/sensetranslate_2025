@@ -1,37 +1,55 @@
 <template>
-  <li>
-    <div class="tree">
+  <li v-if="node">
+    <!-- Aplica os estilos dinamicamente -->
+    <div class="tree" :style="{ fontSize: fontSize + 'px', width: boxWidth + 'px' }">
       <p><strong>{{ node.name }}</strong></p>
       <div v-if="node.nato">Nato a {{ node.nato }} em {{ node.il }}</div>
       <div v-if="node.matrimonio">Casado com {{ node.matrimonio }}</div>
       <div v-if="node.smaller">- Minore</div>
-
-
     </div>
 
     <!-- Renderiza filhos -->
-    <ul v-if="node.children.length">
+    <ul v-if="node.children && node.children.length">
       <TreeNodeClear 
         v-for="child in node.children" 
         :key="child.id" 
         :node="child" 
-        @edit="$emit('edit', $event)"
-        @delete="$emit('delete', $event)"
+        :font-size="fontSize"
+        :box-width="boxWidth"
       />
     </ul>
   </li>
 </template>
 
 <script setup>
+import { defineProps, ref, onMounted } from 'vue';
+
+// Captura os parâmetros da URL diretamente
+const urlParams = new URLSearchParams(window.location.search);
+const fontSize = ref(urlParams.get('fontSize') ? parseInt(urlParams.get('fontSize')) : 12);
+const boxWidth = ref(urlParams.get('boxWidth') ? parseInt(urlParams.get('boxWidth')) : 200);
+
+// Logs para depuração
+onMounted(() => {
+  console.log('Font Size recebido da URL:', fontSize.value);
+  console.log('Box Width recebido da URL:', boxWidth.value);
+});
+
+// Define as propriedades recebidas pelo componente
 defineProps({
   node: {
     type: Object,
     required: true
+  },
+  fontSize: {
+    type: Number,
+    default: 12
+  },
+  boxWidth: {
+    type: Number,
+    default: 200
   }
 });
-
-// Importa ele mesmo para ser recursivo
-import TreeNode from './TreeNode.vue';
 </script>
 
 <style scoped>
@@ -41,9 +59,7 @@ import TreeNode from './TreeNode.vue';
   text-decoration: none;
   color: #666;
   font-family: arial, verdana, tahoma;
-  font-size: 10px;
   display: inline-block;
-  width: 150px; /* aumentei um pouco pra caber os botões */
   border-radius: 5px;
   transition: all 0.5s;
   background-color: #fff;
@@ -52,18 +68,6 @@ import TreeNode from './TreeNode.vue';
 
 .tree ul {
   padding-top: 20px;
-  position: relative;
-  transition: all 0.5s;
-}
-
-.patriado {
-  background: #fff;
-  color: #000;
-}
-
-.solicitante {
-  background: #ccc;
-  color: white;
 }
 
 .tree li {

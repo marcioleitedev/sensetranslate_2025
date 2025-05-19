@@ -68,7 +68,7 @@ body {
   list-style-type: none;
   position: relative;
   padding: 1rem;
-  min-width: 200px;
+  min-width: 150px;
 }
 
 /* Responsive adjustments */

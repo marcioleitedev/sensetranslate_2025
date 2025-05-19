@@ -101,22 +101,56 @@
           </ul>
         </div>
 
-        <!-- Visualizar PDF - Novo Botão -->
-        <div class="col-12 d-flex flex-column align-items-center mt-1">
-          <div class="mt-auto">
-            <a :href="`/dashboard/pdf/${serviceId}`" class="btn btn-success mb-4" target="_blank" rel="noopener">
-  Visualizar PDF
-</a>
-          </div>
+     <div class="col-md-12">............</div>
+
+        <!-- Formulário para ajustar PDF -->
+        <div class="form-group col-12">
+          <label for="fontSize">Tamanho da Fonte</label>
+          <input
+            type="number"
+            id="fontSize"
+            class="form-control"
+            v-model="pdfSettings.fontSize"
+            min="8"
+            max="24"
+          />
         </div>
 
+        <div class="form-group col-12">
+          <label for="boxWidth">Largura do Box</label>
+          <input
+            type="number"
+            id="boxWidth"
+            class="form-control"
+            v-model="pdfSettings.boxWidth"
+            min="100"
+            max="500"
+          />
+        </div>
+
+        <!-- Visualizar PDF -->
+        <div class="col-12 d-flex flex-column align-items-center mt-1">
+          <div class="mt-auto">
+            <a
+              :href="`/dashboard/pdf/${serviceId}?fontSize=${pdfSettings.fontSize}&boxWidth=${pdfSettings.boxWidth}`"
+              class="btn btn-success mb-4"
+              target="_blank"
+              rel="noopener"
+            >
+              Visualizar PDF
+            </a>
+          </div>
+        </div>
       </div>
     </main>
   </div>
 </template>
 
 <style scoped>
-
+.form-group {
+  display: block; /* Garante que a div seja exibida como um bloco */
+  margin-top: 20px; /* Adiciona espaçamento entre as divs */
+}
 .conteudo {
   margin-left: 220px;
   transition: margin-left 0.3s ease;
@@ -165,8 +199,6 @@ import TreeNode from '@/Components/TreeNode.vue';
 import MenuLateral from '@/components/MenuLateral.vue';
 import { usePage } from '@inertiajs/vue3';
 
-import { Link } from '@inertiajs/vue3';
-
 // Referências de dados
 const showMobileMenu = ref(false);
 const showModal = ref(false);
@@ -184,6 +216,12 @@ const form = ref({
 });
 const genealogy = ref([]);
 
+// Configurações para o PDF
+const pdfSettings = ref({
+  fontSize: 12, // Tamanho de fonte padrão
+  boxWidth: 200 // Largura do box padrão
+});
+
 // Pega o ID do serviço da página
 const page = usePage();
 const serviceId = page.props.id;
@@ -192,7 +230,6 @@ const serviceId = page.props.id;
 async function loadGenealogyTree() {
   try {
     const { data } = await axios.get(`http://127.0.0.1:8000/api/genealogy/tree/${serviceId}`);
-    
     service.value = data.service;
     genealogy.value = data.genealogy;
     nodes.value = organizeTree(data.genealogy);
@@ -244,13 +281,11 @@ async function submitForm() {
     resetForm();
     closeModal();
     await loadGenealogyTree();
-
   } catch (error) {
     console.error('Erro ao salvar:', error);
     alert('Erro ao salvar o membro.');
   }
 }
-
 
 // Fecha o modal
 function closeModal() {
@@ -289,11 +324,6 @@ async function deleteMember(node) {
     console.error('Erro ao deletar membro:', error);
     alert('Erro ao deletar o membro.');
   }
-}
-
-// Função para visualizar PDF
-function viewPdf() {
-  Inertia.visit(`/dashboard/pdf/${serviceId}`);
 }
 
 // Carrega a árvore ao montar o componente

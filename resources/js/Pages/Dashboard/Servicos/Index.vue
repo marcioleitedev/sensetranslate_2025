@@ -11,10 +11,11 @@
   <main class="conteudo flex-grow-1 p-4">
     <h1 class="mb-4">Lista de Serviços</h1>
 
-          <!-- Flash Message -->
-      <div v-if="flashMessage" class="alert" :class="flashType" role="alert">
-        {{ flashMessage }}
-      </div>
+    <!-- Flash Message -->
+    <div v-if="flashMessage" class="alert" :class="flashClass" role="alert">
+      {{ flashMessage }}
+    </div>
+
     <!-- Campo de busca -->
     <div class="input-group mb-3">
       <input
@@ -38,9 +39,8 @@
           <th>Nome</th>
           <th>Preço</th>
           <th>Status</th>
-          <th>Pagamento</th>
           <th>Período</th>
-          <th>Arvore</th>
+          <th>Árvore</th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -49,14 +49,13 @@
           <td>{{ service.id }}</td>
           <td>{{ service.name }}</td>
           <td>{{ service.price }}</td>
-          <td>{{ service.status }}</td>
-          <td>{{ service.method_payment }}</td>
+          <td>{{ statusMap[service.status] }}</td>
           <td>{{ formatDate(service.start) }} - {{ formatDate(service.end) }}</td>
-        <td>
-  <a :href="`/dashboard/arvore/${service.id}`" class="btn btn-outline-success btn-sm">
-    <i class="bi bi-tree-fill"></i> Ver Árvore
-  </a>
-</td>
+          <td>
+            <a :href="`/dashboard/arvore/${service.id}`" class="btn btn-outline-success btn-sm">
+              <i class="bi bi-tree-fill"></i> Ver Árvore
+            </a>
+          </td>
           <td>
             <button class="btn btn-primary me-1" @click="openEditModal(service)">
               <i class="bi bi-pencil-square"></i>
@@ -87,7 +86,7 @@
       </ul>
     </nav>
 
-    <!-- Modal (mantido como estava) -->
+    <!-- Modal -->
     <div v-if="showModal">
       <div class="modal-backdrop fade show"></div>
       <div class="modal d-block" tabindex="-1">
@@ -99,20 +98,46 @@
             </div>
             <div class="modal-body">
               <!-- Formulário do modal -->
-              <form @submit.prevent="saveService">
-                <!-- Campos do formulário (idênticos) -->
-                <div class="mb-3" v-for="field in formFields" :key="field.model">
-                  <label class="form-label">{{ field.label }}</label>
-                  <component
-                    :is="field.type"
-                    v-model="currentService[field.model]"
-                    class="form-control"
-                    :type="field.inputType"
-                    :rows="field.rows"
-                  />
-                </div>
-                <button type="submit" class="btn btn-success">{{ modalButtonText }}</button>
-              </form>
+  <form @submit.prevent="saveService">
+  <div class="mb-3" v-for="field in formFields" :key="field.model">
+    <label class="form-label">{{ field.label }}</label>
+
+    <!-- Input -->
+    <input
+      v-if="field.type === 'input'"
+      v-model="currentService[field.model]"
+      :type="field.inputType"
+      class="form-control"
+    />
+
+    <!-- Textarea -->
+    <textarea
+      v-else-if="field.type === 'textarea'"
+      v-model="currentService[field.model]"
+      :rows="field.rows"
+      class="form-control"
+    ></textarea>
+
+    <!-- Select -->
+    <select
+      v-else-if="field.type === 'select'"
+      v-model="currentService[field.model]"
+      class="form-control"
+    >
+      <option v-for="option in field.options" :key="option.value" :value="option.value">
+        {{ option.text }}
+      </option>
+    </select>
+
+    <!-- Fallback -->
+    <div v-else>
+      <small class="text-muted">Tipo de campo "{{ field.type }}" não suportado.</small>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-success">{{ modalButtonText }}</button>
+</form>
+
             </div>
           </div>
         </div>
@@ -134,8 +159,14 @@ const modalButtonText = ref('Salvar');
 const search = ref('');
 const showMobileMenu = ref(false);
 const currentService = ref({
-  id: null, name: '', price: '', method_payment: '', status: 'pendente',
-  start: '', end: '', contract: '', obs: ''
+  id: null,
+  name: '',
+  price: '',
+  method_payment: '',
+  status: 1,
+  start: '',
+  end: '',
+  obs: ''
 });
 
 const flashMessage = ref('');
@@ -154,12 +185,34 @@ const formFields = [
   { model: 'name', label: 'Nome', type: 'input', inputType: 'text' },
   { model: 'price', label: 'Preço', type: 'input', inputType: 'number' },
   { model: 'method_payment', label: 'Forma de Pagamento', type: 'input', inputType: 'text' },
-  { model: 'status', label: 'Status', type: 'select', inputType: '', options: ['pendente', 'em andamento', 'concluído'] },
+  { 
+    model: 'status', 
+    label: 'Status', 
+    type: 'select', 
+    inputType: '', 
+    options: [
+      { value: 1, text: 'Criado' },
+      { value: 2, text: 'Documentos Enviados' },
+      { value: 3, text: 'Em Processo' },
+      { value: 4, text: 'Finalizado' },
+      { value: 5, text: 'Entregue' },
+      { value: 6, text: 'Faturado' }
+    ] 
+  },
   { model: 'start', label: 'Data de Início', type: 'input', inputType: 'date' },
   { model: 'end', label: 'Data de Término', type: 'input', inputType: 'date' },
-  { model: 'contract', label: 'Contrato', type: 'textarea', rows: 3 },
+
   { model: 'obs', label: 'Observações', type: 'textarea', rows: 3 }
 ];
+
+const statusMap = {
+  1: 'Criado',
+  2: 'Documentos Enviados',
+  3: 'Em Processo',
+  4: 'Finalizado',
+  5: 'Entregue',
+  6: 'Faturado'
+};
 
 const fetchServices = async (page = 1) => {
   try {
@@ -182,14 +235,15 @@ const clearSearch = () => {
 };
 
 const openCreateModal = () => {
-  currentService.value = { id: null, name: '', price: '', method_payment: '', status: 'pendente', start: '', end: '', contract: '', obs: '' };
+  currentService.value = { id: null, name: '', price: '', method_payment: '', status: 1, start: '', end: '', contract: '', obs: '' };
   modalTitle.value = 'Criar Serviço';
   modalButtonText.value = 'Salvar';
   showModal.value = true;
 };
 
 const openEditModal = (service) => {
-  currentService.value = { ...service };
+  console.log('Serviço selecionado para edição:', service); // Log para depuração
+  currentService.value = { ...service }; // Preenche o formulário com os dados do serviço
   modalTitle.value = 'Editar Serviço';
   modalButtonText.value = 'Atualizar';
   showModal.value = true;
@@ -213,8 +267,7 @@ const removeService = async (id) => {
   if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
   try {
     await axios.delete(`http://localhost:8000/api/services/${id}`);
-  const message = response.data.message || 'Serviço removido com sucesso.';
-    showFlashMessage(message, 'alert-success');
+    showFlashMessage('Serviço removido com sucesso.', 'alert-success');
     fetchServices();
   } catch (error) {
     console.error('Erro ao remover serviço:', error);

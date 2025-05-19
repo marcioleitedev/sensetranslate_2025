@@ -13,6 +13,7 @@
             <li><a href="/servicos">Serviços</a></li>
             <li><a href="/empresa">Empresa</a></li>
             <li><a href="/contato">Contato</a></li>
+            <li><a href="/login">Login</a></li>
           </ul>
         </div>
       </div>
@@ -26,8 +27,8 @@
 
 <style scoped>
 .footer {
-  background-color: #000; /* fundo preto */
-  color: #fff;            /* texto branco */
+  background: linear-gradient(to bottom, #000, #e2b560); /* Degradê de preto para branco */
+  color: #fff; /* Texto branco */
   padding: 40px 20px;
   height: 300px;
 }

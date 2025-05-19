@@ -17,16 +17,31 @@ class BudgetController extends Controller
         try {
             $query = Budget::query();
 
+            // Recupera o nível e ID do usuário enviados pelo frontend
+            $userId = $request->user_id;
+            $level = $request->level;
+
+            // Se o nível for diferente de 3, filtra pelo user_id
+            if ($level != 3 && $userId) {
+                $query->where('user_id', $userId);
+            }
+            // Filtro de busca
             if ($request->has('search') && !empty($request->search)) {
                 $search = $request->search;
-                $query->where(function ($q) use ($search) {
+                $query->where(function ($q) use ($search, $level, $userId) {
                     $q->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%")
                         ->orWhere('phone', 'like', "%{$search}%");
+
+                    // Adiciona o filtro de user_id se o nível for diferente de 3
+                    if ($level != 3 && $userId) {
+                        $q->where('user_id', $userId);
+                    }
                 });
             }
 
             $budgets = $query->orderBy('id', 'desc')->paginate(10);
+
             return response()->json($budgets);
         } catch (\Exception $e) {
             return response()->json([
