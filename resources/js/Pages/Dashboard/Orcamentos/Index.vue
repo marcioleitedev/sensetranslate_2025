@@ -107,8 +107,18 @@
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label">Conteúdo do Orçamento (HTML)</label>
-                  <quill-editor v-model:content="newBudget.content" />
+                  <label class="form-label">Conteúdo do Orçamento (HTML) cAD</label>
+<QuillEditorComponent
+  v-model:content="newBudget.content"
+  content-type="html"
+  :toolbar="[
+    ['bold', 'italic', 'underline'],
+    [{ header: 1 }, { header: 2 }],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    ['link'],
+    ['clean']
+  ]"
+/>
                 </div>
 
                 <div class="mb-3">
@@ -144,8 +154,11 @@
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label">Conteúdo do Orçamento (HTML)</label>
-                  <quill-editor v-model:content="budgetToEdit.content" />
+                  <label class="form-label">Conteúdo do Orçamento (HTML) caraca</label>
+<QuillEditorComponent
+  v-model:content="budgetToEdit.content"
+  content-type="html"
+/>
                 </div>
 
                 <div class="mb-3">
@@ -176,6 +189,8 @@ import MenuLateral from '@/components/MenuLateral.vue';
 import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import { jwtDecode } from 'jwt-decode'
+
+const QuillEditorComponent = QuillEditor;
 
 const isAuthenticated = ref(false)
 const user = ref({
