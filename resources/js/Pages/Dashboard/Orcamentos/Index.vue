@@ -54,13 +54,12 @@
             <td>{{ budget.phone }}</td>
             <td>{{ budget.price }}</td>
             <td>
-              <a
-    :href="getWhatsAppLink(budget.phone, budget.content)"
-    target="_blank"
-    class="btn btn-success btn-sm"
-  >
-    <i class="bi bi-whatsapp"></i> Enviar
-  </a>
+<button
+  @click="sendPDFViaWhatsApp(budget)"
+  class="btn btn-success btn-sm"
+>
+  <i class="bi bi-whatsapp"></i> Enviar
+</button>
             </td>
             <td>{{ getStatusName(budget.status) }}</td>
             <td>
@@ -258,6 +257,31 @@ const getWhatsAppLink = (phone, content) => {
   return `https://wa.me/55${cleaned}?text=${encodedContent}`;
 };
 
+const sendPDFViaWhatsApp = async (budget) => {
+  try {
+    // 1. Gerar PDF no backend com nome e content do orçamento
+    const response = await axios.post('http://localhost:8000/api/generate-pdf', {
+      name: budget.name,
+      content: budget.content,
+    });
+
+    const pdfUrl = response.data.url;
+
+    // 2. Montar link do WhatsApp com o link do PDF
+    const phone = budget.phone.replace(/\D/g, '');
+    const message = `Olá ${budget.name}, segue seu orçamento em PDF:\n${pdfUrl}`;
+    const whatsappLink = `https://wa.me/55${phone}?text=${encodeURIComponent(message)}`;
+
+    
+    // 3. Abrir link do WhatsApp
+    window.open(whatsappLink, '_blank');
+  } catch (error) {
+    console.error('Erro ao gerar PDF e enviar pelo WhatsApp:', error);
+    showFlashMessage('Erro ao gerar PDF para WhatsApp.', 'alert-danger');
+  }
+};
+
+
 const showFlashMessage = (message, type) => {
   flashMessage.value = message;
   flashType.value = type;
@@ -282,7 +306,7 @@ watch(searchTerm, () => debouncedFetch());
 const createBudget = async () => {
   try {
 
-    newBudget.value.user_id = user.value.id; // garante que é número
+    newBudget.value.user_id = user.value.id; 
     console.log('Payload enviado:', newBudget.value);
 
     await axios.post('http://localhost:8000/api/budgets', newBudget.value);

@@ -5,6 +5,7 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\UsuariosController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\GenealogyController;
+use App\Http\Controllers\PDFController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SocialAuthController;
@@ -49,4 +50,8 @@ Route::controller(GenealogyController::class)->prefix('genealogy')->group(functi
 
     Route::get('/tree/{service}', [GenealogyController::class, 'getTree']);
     Route::get('/genealogy/clean-tree/{service}', [GenealogyController::class, 'getCleanTree']);
+});
+
+Route::controller(PDFController::class)->prefix('generate-pdf')->group(function () {
+    Route::post('/', 'generate');
 });
