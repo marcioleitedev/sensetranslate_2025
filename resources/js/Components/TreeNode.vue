@@ -51,7 +51,7 @@ import TreeNode from './TreeNode.vue';
   font-family: arial, verdana, tahoma;
   font-size: 10px;
   display: inline-block;
-  width: 150px; /* aumentei um pouco pra caber os botões */
+  width: 150px; 
   border-radius: 5px;
   transition: all 0.5s;
   background-color: #fff;
