@@ -107,18 +107,18 @@
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label">Conteúdo do Orçamento (HTML) cAD</label>
-<QuillEditorComponent
-  v-model:content="newBudget.content"
-  content-type="html"
-  :toolbar="[
-    ['bold', 'italic', 'underline'],
-    [{ header: 1 }, { header: 2 }],
-    [{ list: 'ordered' }, { list: 'bullet' }],
-    ['link'],
-    ['clean']
-  ]"
-/>
+                  
+                <QuillEditorComponent
+                  v-model:content="newBudget.content"
+                  content-type="html"
+                  :toolbar="[
+                    ['bold', 'italic', 'underline'],
+                    [{ header: 1 }, { header: 2 }],
+                    [{ list: 'ordered' }, { list: 'bullet' }],
+                    ['link'],
+                    ['clean']
+                  ]"
+                />
                 </div>
 
                 <div class="mb-3">
@@ -158,6 +158,8 @@
 <QuillEditorComponent
   v-model:content="budgetToEdit.content"
   content-type="html"
+  style="min-height: 200px; background: white;"
+
 />
                 </div>
 
@@ -373,7 +375,7 @@ const removeBudget = async (budgetId) => {
 fetchBudgets();
 </script>
 
-<style scoped>
+<style>
 .modal {
   background: rgba(0, 0, 0, 0.5);
 }

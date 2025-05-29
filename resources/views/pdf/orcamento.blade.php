@@ -32,7 +32,7 @@
 
 <body>
     <header>
-        <img src="{{ public_path('images/logo.png') }}" alt="Logo" class="logo">
+        <img src="{{ public_path('images/logo.jpg') }}" alt="Logo" class="logo">
         <h2>Orçamento para Serviços de Cidadania Italiana - Família STOPPA</h2>
     </header>
 
@@ -60,6 +60,20 @@
 
         <div>
             {!! $content !!}
+        </div>
+
+        <div>
+            <p><strong>Bruno Santos Projetos</strong></p>
+            <ul>
+                <li>Tel.: +55 11 9 5059-0525</li>
+                <li>e-mail: bruno@sensetranslate.com</li>
+                <li>https://www.facebook.com/Sensetranslate/</li>
+                <li>https://www.linkedin.com/company/sense-translate </li>
+                <li>https://www.linkedin.com/in/bruno-santos-01062b1a5/</li>
+                <li>https://www.sensetranslate.com</li>
+            </ul>
+
+
         </div>
     </div>
 </body>

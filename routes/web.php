@@ -11,6 +11,7 @@ Route::get('/localizacao', fn() => Inertia::render('Localizacao/Index'));
 Route::get('/servicos', fn() => Inertia::render('Servicos/Index'));
 Route::get('/login', fn() => Inertia::render('Login/Index'));
 
+
 // ROTAS PROTEGIDAS (DASHBOARD)
 Route::prefix('dashboard')->group(function () {
     Route::get('/', fn() => Inertia::render('Dashboard/Home/Index'));
