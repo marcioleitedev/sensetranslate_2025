@@ -38,7 +38,7 @@ class GenealogyController extends Controller
     {
 
         $service = Service::where('id', $id)->first();
-        $genealogy = Genealogy::where('service', $id)->get();
+        $genealogy = Genealogy::where('service', $id)->orderBy('il', 'asc')->get();
 
         return response()->json([
             'service' => $service,

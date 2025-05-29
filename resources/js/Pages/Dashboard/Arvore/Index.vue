@@ -101,11 +101,10 @@
           </ul>
         </div>
 
-     <div class="col-md-12">............</div>
 
         <!-- Formulário para ajustar PDF -->
         <div class="form-group col-12">
-          <label for="fontSize">Tamanho da Fonte</label>
+       
           <input
             type="number"
             id="fontSize"
@@ -113,11 +112,12 @@
             v-model="pdfSettings.fontSize"
             min="8"
             max="24"
+            placeholder="Tamanho da Fonte (8-24)"
           />
         </div>
 
         <div class="form-group col-12">
-          <label for="boxWidth">Largura do Box</label>
+       
           <input
             type="number"
             id="boxWidth"
@@ -125,6 +125,7 @@
             v-model="pdfSettings.boxWidth"
             min="100"
             max="500"
+            placeholder="Largura do Box (100-500)"
           />
         </div>
 
@@ -218,8 +219,8 @@ const genealogy = ref([]);
 
 // Configurações para o PDF
 const pdfSettings = ref({
-  fontSize: 12, // Tamanho de fonte padrão
-  boxWidth: 200 // Largura do box padrão
+  fontSize: null, // Tamanho de fonte padrão
+  boxWidth: null // Largura do box padrão
 });
 
 // Pega o ID do serviço da página
