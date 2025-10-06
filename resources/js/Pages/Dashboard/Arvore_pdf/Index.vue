@@ -125,7 +125,7 @@ body {
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import TreeNodeClear from '@/Components/TreeNodeClear.vue';
-import MenuLateral from '@/components/MenuLateral.vue';
+import MenuLateral from '@/Components/MenuLateral.vue';
 import { usePage } from '@inertiajs/vue3';
 
 // Date referer

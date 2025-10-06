@@ -10,6 +10,7 @@ Route::get('/empresa', fn() => Inertia::render('Empresa/Index'));
 Route::get('/localizacao', fn() => Inertia::render('Localizacao/Index'));
 Route::get('/servicos', fn() => Inertia::render('Servicos/Index'));
 Route::get('/login', fn() => Inertia::render('Login/Index'));
+Route::get('/forgot', fn() => Inertia::render('Forgot/Index'));
 
 
 // ROTAS PROTEGIDAS (DASHBOARD)
@@ -28,4 +29,7 @@ Route::prefix('dashboard')->group(function () {
     Route::get('/arvore/{id}', fn($id) => Inertia::render('Dashboard/Arvore/Index',  ['id' => $id]));
 
     Route::get('/pdf/{id}', fn($id) => Inertia::render('Dashboard/Arvore_pdf/Index',  ['id' => $id]));
+
+    // Rota de Agente de IA
+    Route::get('/agente-ia', fn() => Inertia::render('Dashboard/AgenteIA/Index'));
 });

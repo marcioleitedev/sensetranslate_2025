@@ -38,6 +38,12 @@
         </a>
       </li>
       <li class="nav-item">
+        <a class="nav-link text-white" href="/dashboard/agente-ia">
+          <i class="bi bi-robot me-2"></i>
+          <span v-if="!isCollapsed">Agente de IA</span>
+        </a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link text-white" href="#" @click.prevent="logout">
           <i class="bi bi-box-arrow-right me-2"></i>
           <span v-if="!isCollapsed">Sair</span>
