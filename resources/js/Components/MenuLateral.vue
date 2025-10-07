@@ -44,6 +44,13 @@
         </a>
       </li>
       <li class="nav-item">
+        <a class="nav-link text-white" href="/dashboard/evolution" target="_blank">
+          <i class="bi bi-chat-dots me-2"></i>
+          <span v-if="!isCollapsed">Evolution API</span>
+          <i class="bi bi-box-arrow-up-right ms-1" v-if="!isCollapsed" style="font-size: 0.8rem;"></i>
+        </a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link text-white" href="#" @click.prevent="logout">
           <i class="bi bi-box-arrow-right me-2"></i>
           <span v-if="!isCollapsed">Sair</span>

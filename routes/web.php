@@ -32,4 +32,7 @@ Route::prefix('dashboard')->group(function () {
 
     // Rota de Agente de IA
     Route::get('/agente-ia', fn() => Inertia::render('Dashboard/AgenteIA/Index'));
+
+    // Rota do Evolution
+    Route::get('/evolution', [App\Http\Controllers\EvolutionController::class, 'index']);
 });
