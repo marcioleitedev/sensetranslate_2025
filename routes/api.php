@@ -6,6 +6,7 @@ use App\Http\Controllers\UsuariosController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\GenealogyController;
 use App\Http\Controllers\PDFController;
+use App\Http\Controllers\AgenteIAController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SocialAuthController;
@@ -54,4 +55,13 @@ Route::controller(GenealogyController::class)->prefix('genealogy')->group(functi
 
 Route::controller(PDFController::class)->prefix('generate-pdf')->group(function () {
     Route::post('/', 'generate');
+});
+
+// Rotas do Agente IA (sem autenticação por enquanto para facilitar testes)
+Route::controller(AgenteIAController::class)->prefix('agente-ia')->group(function () {
+    Route::post('/upload', 'uploadFiles');
+    Route::get('/session/{sessionId}/files', 'getSessionFiles');
+    Route::delete('/session/{sessionId}/files', 'deleteSessionFiles');
+    Route::post('/process', 'processFiles');
+    Route::post('/process-text', 'processText');
 });
